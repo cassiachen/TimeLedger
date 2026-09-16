@@ -94,7 +94,7 @@ export function AddTransactionModal() {
     <div className="sheet-overlay show" onClick={(e) => e.target === e.currentTarget && closeAddModal()}>
       <div className="sheet-content max-w-md mx-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-primary">{isEditing ? '编辑记录' : '记一笔'}</h3>
+          <h3 className="font-headline-md text-headline-md text-on-surface">{isEditing ? '编辑记录' : '记一笔'}</h3>
           <button className="text-outline/60 hover:text-outline p-1" onClick={closeAddModal} aria-label="关闭">
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -106,8 +106,8 @@ export function AddTransactionModal() {
             <button
               key={tab.key}
               onClick={() => setType(tab.key)}
-              className={`h-9 rounded-lg text-sm font-medium transition-colors ${
-                type === tab.key ? 'bg-primary text-on-primary' : 'text-on-surface-variant'
+              className={`h-9 rounded font-label-md text-label-md font-medium transition-colors ${
+                type === tab.key ? 'bg-surface-container-lowest text-on-surface shadow-sm' : 'text-on-surface-variant'
               }`}
             >
               {tab.label}
@@ -117,7 +117,7 @@ export function AddTransactionModal() {
 
         {/* 金额 */}
         <div className="mb-4">
-          <label className="text-xs text-on-surface-variant block mb-1">金额 (¥)</label>
+          <label className="font-label-md text-label-md text-on-surface-variant block mb-1">金额 (¥)</label>
           <input
             type="number"
             inputMode="decimal"
@@ -126,7 +126,7 @@ export function AddTransactionModal() {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
-            className="w-full bg-surface-container-low rounded-xl px-4 py-3 text-lg text-primary outline-none placeholder:text-outline-variant"
+            className="w-full h-12 bg-surface-container-low rounded px-4 font-metric-lg text-metric-lg text-on-surface outline-none placeholder:text-outline-variant"
           />
         </div>
 
@@ -134,24 +134,24 @@ export function AddTransactionModal() {
           <>
             {/* 分类 */}
             <div className="mb-4">
-              <label className="text-xs text-on-surface-variant block mb-2">分类</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-2">分类</label>
               <div className="grid grid-cols-4 gap-2">
                 {categories.map((c) => (
                   <div
                     key={c.key}
                     onClick={() => setCategory(c.key)}
-                    className={`p-2.5 rounded-xl border-2 text-center text-xs cursor-pointer transition-all ${
-                      category === c.key ? 'border-accent-dim bg-accent-dim/10' : 'border-transparent bg-surface-container-low'
+                    className={`p-2.5 rounded border-2 text-center font-label-md text-label-md cursor-pointer transition-all ${
+                      category === c.key ? 'border-secondary bg-secondary-fixed/40' : 'border-transparent bg-surface-container-low'
                     }`}
                   >
-                    <span className="text-xl block mb-0.5">{c.icon}</span>
+                    <span className="material-symbols-outlined text-[20px] block mb-0.5 mx-auto">{c.icon}</span>
                     {c.key}
                   </div>
                 ))}
                 {type === 'expense' && (
                   <div
                     onClick={() => setShowCustomCategoryInput(true)}
-                    className="p-2.5 rounded-xl border-2 border-dashed border-outline-variant text-center text-xs cursor-pointer text-outline flex flex-col items-center justify-center"
+                    className="p-2.5 rounded border-2 border-dashed border-outline-variant text-center font-label-md text-label-md cursor-pointer text-outline flex flex-col items-center justify-center"
                   >
                     <span className="material-symbols-outlined text-[20px] mb-0.5">add</span>
                     自定义
@@ -165,10 +165,10 @@ export function AddTransactionModal() {
                     value={customCategoryName}
                     onChange={(e) => setCustomCategoryName(e.target.value)}
                     placeholder="新分类名称"
-                    className="flex-1 bg-surface-container-low rounded-xl px-3 py-2 text-sm outline-none"
+                    className="flex-1 bg-surface-container-low rounded px-3 py-2 font-body-sm text-body-sm outline-none"
                     onKeyDown={(e) => e.key === 'Enter' && handleAddCustomCategory()}
                   />
-                  <button onClick={handleAddCustomCategory} className="px-3 rounded-xl bg-primary text-on-primary text-sm">
+                  <button onClick={handleAddCustomCategory} className="px-3 rounded bg-primary text-on-primary font-label-md text-label-md">
                     添加
                   </button>
                 </div>
@@ -177,13 +177,13 @@ export function AddTransactionModal() {
 
             {/* 账户 */}
             <div className="mb-4">
-              <label className="text-xs text-on-surface-variant block mb-2">账户</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-2">账户</label>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {ACCOUNTS.map((a) => (
                   <button
                     key={a.key}
                     onClick={() => setAccount(a.key)}
-                    className={`flex-shrink-0 px-3 py-2 rounded-xl text-sm flex items-center gap-1.5 transition-colors ${
+                    className={`flex-shrink-0 px-3 py-2 rounded font-label-md text-label-md flex items-center gap-1.5 transition-colors ${
                       account === a.key ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant'
                     }`}
                   >
@@ -197,21 +197,21 @@ export function AddTransactionModal() {
             {/* 商户/备注 */}
             <div className="mb-4 grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-on-surface-variant block mb-1">商户 (可选)</label>
+                <label className="font-label-md text-label-md text-on-surface-variant block mb-1">商户 (可选)</label>
                 <input
                   value={merchant}
                   onChange={(e) => setMerchant(e.target.value)}
                   placeholder="如：星巴克"
-                  className="w-full bg-surface-container-low rounded-xl px-3 py-2.5 text-sm text-primary outline-none placeholder:text-outline-variant"
+                  className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none placeholder:text-outline-variant"
                 />
               </div>
               <div>
-                <label className="text-xs text-on-surface-variant block mb-1">备注 (可选)</label>
+                <label className="font-label-md text-label-md text-on-surface-variant block mb-1">备注 (可选)</label>
                 <input
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="..."
-                  className="w-full bg-surface-container-low rounded-xl px-3 py-2.5 text-sm text-primary outline-none placeholder:text-outline-variant"
+                  className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none placeholder:text-outline-variant"
                 />
               </div>
             </div>
@@ -219,11 +219,11 @@ export function AddTransactionModal() {
         ) : (
           <div className="mb-4 grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs text-on-surface-variant block mb-2">转出账户</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-2">转出账户</label>
               <select
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
-                className="w-full bg-surface-container-low rounded-xl px-3 py-2.5 text-sm text-primary outline-none"
+                className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none"
               >
                 {ACCOUNTS.map((a) => (
                   <option key={a.key} value={a.key}>
@@ -233,11 +233,11 @@ export function AddTransactionModal() {
               </select>
             </div>
             <div>
-              <label className="text-xs text-on-surface-variant block mb-2">转入账户</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-2">转入账户</label>
               <select
                 value={toAccount}
                 onChange={(e) => setToAccount(e.target.value)}
-                className="w-full bg-surface-container-low rounded-xl px-3 py-2.5 text-sm text-primary outline-none"
+                className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none"
               >
                 {ACCOUNTS.map((a) => (
                   <option key={a.key} value={a.key}>
@@ -251,19 +251,22 @@ export function AddTransactionModal() {
 
         {/* 时间 */}
         <div className="mb-4">
-          <label className="text-xs text-on-surface-variant block mb-1">时间</label>
+          <label className="font-label-md text-label-md text-on-surface-variant block mb-1">时间</label>
           <input
             type="datetime-local"
             value={timestamp}
             onChange={(e) => setTimestamp(e.target.value)}
-            className="w-full bg-surface-container-low rounded-xl px-4 py-2.5 text-sm text-primary outline-none"
+            className="w-full bg-surface-container-low rounded px-4 py-2.5 font-body-sm text-body-sm text-on-surface outline-none"
           />
         </div>
 
         {type === 'expense' && (
-          <div className="bg-surface-container-low rounded-xl p-3 mb-4 flex justify-between items-center">
-            <span className="text-sm text-on-surface-variant">⏱️ 相当于工作</span>
-            <span className="text-sm font-semibold text-primary">{formatDuration(hoursPreview)}</span>
+          <div className="bg-secondary-fixed/50 rounded p-3 mb-4 flex justify-between items-center">
+            <span className="font-body-sm text-body-sm text-on-secondary-fixed flex items-center gap-1">
+              <span className="material-symbols-outlined text-[15px] text-secondary">hourglass_bottom</span>
+              相当于工作
+            </span>
+            <span className="font-metric-sm text-metric-sm font-semibold text-on-secondary-fixed">{formatDuration(hoursPreview)}</span>
           </div>
         )}
 
@@ -271,7 +274,7 @@ export function AddTransactionModal() {
           {isEditing && (
             <button
               onClick={handleDelete}
-              className="h-12 px-4 rounded-xl border border-error/30 text-error text-sm font-medium active:scale-[0.98] transition-transform"
+              className="h-12 px-4 rounded border border-error/30 text-error font-label-md text-label-md font-medium active:scale-[0.98] transition-transform"
             >
               删除
             </button>
@@ -279,9 +282,9 @@ export function AddTransactionModal() {
           <button
             onClick={handleSave}
             disabled={!amountNum}
-            className="flex-1 h-12 bg-primary text-on-primary rounded-xl text-[15px] font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-40"
+            className="flex-1 h-12 bg-primary text-on-primary rounded font-body-lg text-body-lg font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-40"
           >
-            <span className="material-symbols-outlined text-[20px]">check</span>
+            <span className="material-symbols-outlined text-[20px]">check_circle</span>
             保存
           </button>
         </div>

@@ -1,147 +1,233 @@
 import { useMemo, useState } from 'react'
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
-import { StatCard } from '../components/StatCard'
-import { getCurrentMonthKey, getLastMonthKey, getMonthKey, formatMonthLabel } from '../lib/date'
-import { getDailyTrend, getExpenseCategoryStats, getMonthTotals, getMonthOverMonth } from '../lib/selectors'
-import { formatDuration, formatMoney, formatPercentChange } from '../lib/time-value'
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { getCategoryIcon } from '../lib/categories'
+import { getCurrentMonthKey, getMonthKey } from '../lib/date'
+import {
+  getDailyTrend,
+  getExpenseCategoryStats,
+  getMonthTotals,
+  getWeekTotals,
+  getYearTotals,
+  type PeriodTotals,
+} from '../lib/selectors'
+import { formatHM, formatMoney } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
-export function Stats() {
-  const { transactions, hourlyWage } = useLedger()
-  const [trendMetric, setTrendMetric] = useState<'expense' | 'hours'>('expense')
+type Period = '周' | '月' | '年' | '自定义'
 
+export function Stats() {
+  const { transactions, hourlyWage, expenseCategories, wageSettings } = useLedger()
+  const [period, setPeriod] = useState<Period>('月')
+
+  const weekTotals = useMemo(() => getWeekTotals(transactions, hourlyWage), [transactions, hourlyWage])
   const monthTotals = useMemo(() => getMonthTotals(transactions, hourlyWage), [transactions, hourlyWage])
-  const mom = useMemo(() => getMonthOverMonth(transactions, hourlyWage), [transactions, hourlyWage])
+  const yearTotals = useMemo(() => getYearTotals(transactions, hourlyWage), [transactions, hourlyWage])
+
+  const totalsByPeriod: Record<Period, PeriodTotals> = {
+    '周': weekTotals,
+    '月': monthTotals,
+    '年': yearTotals,
+    '自定义': monthTotals,
+  }
+  const totals = totalsByPeriod[period]
+
+  const standardHoursByPeriod: Record<Period, number> = {
+    '周': wageSettings.workHoursPerDay * 7,
+    '月': wageSettings.workDays * wageSettings.workHoursPerDay,
+    '年': wageSettings.workDays * wageSettings.workHoursPerDay * 12,
+    '自定义': wageSettings.workDays * wageSettings.workHoursPerDay,
+  }
+  const standardHours = standardHoursByPeriod[period] || 1
+  const exhaustionRatio = Math.min(100, (totals.expenseHours / standardHours) * 100)
+
   const categoryStats = useMemo(() => {
     const currentMonth = getCurrentMonthKey()
     const thisMonthTxns = transactions.filter((t) => getMonthKey(t.timestamp) === currentMonth)
     return getExpenseCategoryStats(thisMonthTxns, hourlyWage)
   }, [transactions, hourlyWage])
-  const trend = useMemo(() => getDailyTrend(transactions, hourlyWage, 14), [transactions, hourlyWage])
+  const totalCategoryAmount = categoryStats.reduce((s, c) => s + c.amount, 0) || 1
 
-  const maxCategoryAmount = categoryStats[0]?.amount || 1
-  const expenseCompare = formatPercentChange(mom.current.expense, mom.previous.expense)
-  const incomeCompare = formatPercentChange(mom.current.income, mom.previous.income)
+  const trend = useMemo(() => getDailyTrend(transactions, hourlyWage, 18), [transactions, hourlyWage])
+  const dayCount = period === '周' ? 7 : period === '年' ? 365 : 30
+  const dailyAvgHours = totals.expenseHours / dayCount
+  const freedomRatio = 100 - exhaustionRatio
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* 本月概览 */}
-      <section className="animate-fade-in-up">
-        <h2 className="text-sm font-semibold text-outline mb-2">本月概览</h2>
-        <div className="grid grid-cols-2 gap-2">
-          <StatCard label="总收入" value={formatMoney(monthTotals.income)} valueClassName="text-income" />
-          <StatCard label="总支出" value={formatMoney(monthTotals.expense)} valueClassName="text-expense" />
-          <StatCard
-            label="总结余"
-            value={formatMoney(monthTotals.net)}
-            valueClassName={monthTotals.net >= 0 ? 'text-income' : 'text-expense'}
-          />
-          <StatCard label="总消费时间" value={formatDuration(monthTotals.expenseHours)} />
-        </div>
-      </section>
-
-      {/* 环比 */}
-      <section className="animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
-        <h2 className="text-sm font-semibold text-outline mb-2">环比上月</h2>
-        <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-[0_4px_16px_rgba(0,0,0,0.04)] grid grid-cols-2 gap-4">
-          <div>
-            <div className="text-xs text-outline mb-1">支出</div>
-            <div className={`text-lg font-bold ${monthTotals.expense >= mom.previous.expense ? 'text-expense' : 'text-income'}`}>
-              {expenseCompare}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-outline mb-1">收入</div>
-            <div className={`text-lg font-bold ${monthTotals.income >= mom.previous.income ? 'text-income' : 'text-expense'}`}>
-              {incomeCompare}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 分类统计 */}
-      <section className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-        <h2 className="text-sm font-semibold text-outline mb-2">分类统计（本月支出）</h2>
-        {categoryStats.length === 0 ? (
-          <div className="text-center py-8 text-outline/60 bg-surface-container-lowest rounded-2xl">
-            <p className="text-sm">本月还没有支出记录</p>
-          </div>
-        ) : (
-          <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-[0_4px_16px_rgba(0,0,0,0.04)] flex flex-col gap-3">
-            {categoryStats.map((c) => (
-              <div key={c.category}>
-                <div className="flex justify-between items-baseline mb-1">
-                  <span className="text-sm text-primary">{c.category}</span>
-                  <span className="text-sm text-on-surface-variant">
-                    {formatMoney(c.amount)} <span className="text-outline">≈ {formatDuration(c.hours)}</span>
-                  </span>
-                </div>
-                <div className="h-1.5 bg-surface-container rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-accent-dim rounded-full"
-                    style={{ width: `${Math.max(4, (c.amount / maxCategoryAmount) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* 趋势 */}
-      <section className="animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-semibold text-outline">近14天趋势</h2>
-          <div className="flex bg-surface-container-low rounded-lg p-0.5">
+    <div className="flex flex-col w-full space-y-space-lg">
+      {/* Period switch */}
+      <section className="flex items-center justify-between bg-surface-container-low p-1 rounded-xl">
+        <div className="grid grid-cols-4 w-full gap-1">
+          {(['周', '月', '年', '自定义'] as Period[]).map((p) => (
             <button
-              onClick={() => setTrendMetric('expense')}
-              className={`px-2.5 py-1 rounded-md text-xs transition-colors ${
-                trendMetric === 'expense' ? 'bg-primary text-on-primary' : 'text-on-surface-variant'
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`py-1.5 text-center font-label-md text-label-md rounded transition-all ${
+                period === p
+                  ? 'bg-surface-container-lowest text-on-surface font-semibold shadow-sm'
+                  : 'text-on-surface-variant hover:text-on-surface'
               }`}
             >
-              支出
+              {p}
             </button>
-            <button
-              onClick={() => setTrendMetric('hours')}
-              className={`px-2.5 py-1 rounded-md text-xs transition-colors ${
-                trendMetric === 'hours' ? 'bg-primary text-on-primary' : 'text-on-surface-variant'
-              }`}
-            >
-              消费时间
-            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Hero card */}
+      <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
+        <div className="flex items-start justify-between">
+          <div className="flex flex-col space-y-1">
+            <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
+              Temporal Capital Exhaustion
+            </span>
+            <div className="flex items-baseline space-x-1.5">
+              <span className="font-display-lg-mobile text-display-lg-mobile text-on-surface tracking-tight">
+                {totals.expenseHours.toFixed(1)}
+              </span>
+              <span className="font-metric-md text-metric-md text-secondary font-medium">小时</span>
+            </div>
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
+              本{period}消耗相当于占标准工时{' '}
+              <span className="font-metric-sm text-metric-sm text-on-surface font-medium">{standardHours.toFixed(0)}h</span> 的{' '}
+              <span className="font-metric-sm text-metric-sm text-secondary font-medium">{exhaustionRatio.toFixed(1)}%</span>
+            </span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="inline-flex items-center px-2 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-metric-sm text-metric-sm">
+              <span className="material-symbols-outlined text-[13px] mr-1 text-secondary">payments</span>
+              {formatMoney(totals.expense)}
+            </span>
           </div>
         </div>
-        <div className="bg-surface-container-lowest rounded-2xl p-3 shadow-[0_4px_16px_rgba(0,0,0,0.04)]" style={{ height: 180 }}>
+
+        <div className="flex flex-col space-y-1.5 pt-1">
+          <div className="w-full h-2 rounded bg-surface-container-high overflow-hidden flex">
+            <div className="h-full bg-secondary transition-all duration-700" style={{ width: `${exhaustionRatio}%` }} />
+            <div className="h-full bg-surface-container-highest" style={{ width: `${100 - exhaustionRatio}%` }} />
+          </div>
+          <div className="flex items-center justify-between font-label-mono text-label-mono text-on-surface-variant">
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-secondary inline-block" />
+              已耗工时 {totals.expenseHours.toFixed(1)}h
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-surface-variant inline-block" />
+              剩余自由工时 {Math.max(0, standardHours - totals.expenseHours).toFixed(1)}h
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 pt-2 bg-surface-container-low p-2.5 rounded-lg">
+          <div className="flex flex-col min-w-0">
+            <span className="font-label-md text-label-md text-on-surface-variant">总账支出</span>
+            <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{formatMoney(totals.expense)}</span>
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-label-md text-label-md text-on-surface-variant">日均工时消耗</span>
+            <span className="font-metric-sm text-metric-sm text-secondary font-medium mt-0.5 truncate">{dailyAvgHours.toFixed(1)}h</span>
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-label-md text-label-md text-on-surface-variant">剩余自由度</span>
+            <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{Math.max(0, freedomRatio).toFixed(1)}%</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Trend */}
+      <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="font-headline-md text-headline-md text-on-surface tracking-tight">支出趋势与工时波动</span>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">近 18 天每日工时消耗</span>
+          </div>
+        </div>
+        <div style={{ height: 150 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={trend} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 10, fill: '#77767b' }}
-                axisLine={false}
-                tickLine={false}
-                interval={1}
-              />
+            <AreaChart data={trend} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+              <defs>
+                <linearGradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#9b4500" stopOpacity={0.22} />
+                  <stop offset="100%" stopColor="#9b4500" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#76777d' }} axisLine={false} tickLine={false} interval={2} />
               <Tooltip
-                formatter={(value) =>
-                  trendMetric === 'expense' ? formatMoney(Number(value)) : formatDuration(Number(value))
-                }
-                labelStyle={{ color: '#1a1c1d', fontSize: 12 }}
-                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: 12 }}
+                formatter={(value) => formatHM(Number(value))}
+                labelStyle={{ color: '#191c1d', fontSize: 12 }}
+                contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: 12 }}
               />
-              <Bar
-                dataKey={trendMetric === 'expense' ? 'expense' : 'expenseHours'}
-                fill="#4edea3"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={18}
+              <Area
+                type="monotone"
+                dataKey="expenseHours"
+                stroke="#9b4500"
+                strokeWidth={2}
+                fill="url(#areaGradient)"
+                dot={{ r: 2, fill: '#9b4500', stroke: '#ffffff', strokeWidth: 1 }}
               />
-            </BarChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </section>
 
-      <p className="text-xs text-outline/50 text-center">
-        本月 {formatMonthLabel(getCurrentMonthKey())} · 上月 {formatMonthLabel(getLastMonthKey())}
-      </p>
+      {/* Category breakdown */}
+      <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="font-headline-md text-headline-md text-on-surface tracking-tight">分类工时分配</span>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">本月支出占比</span>
+          </div>
+        </div>
+        {categoryStats.length === 0 ? (
+          <p className="font-body-sm text-body-sm text-on-surface-variant">本月还没有支出记录</p>
+        ) : (
+          <div className="flex flex-col space-y-3 pt-1">
+            {categoryStats.map((c) => {
+              const pct = (c.amount / totalCategoryAmount) * 100
+              return (
+                <div key={c.category} className="flex flex-col space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-6 h-6 rounded flex items-center justify-center bg-surface-container-high text-on-surface">
+                        <span className="material-symbols-outlined text-[15px]">
+                          {getCategoryIcon(expenseCategories, c.category)}
+                        </span>
+                      </span>
+                      <span className="font-body-md text-body-md text-on-surface font-medium">{c.category}</span>
+                      <span className="font-label-mono text-label-mono text-on-surface-variant">{pct.toFixed(1)}%</span>
+                    </div>
+                    <div className="flex items-baseline space-x-2">
+                      <span className="font-metric-md text-metric-md text-secondary font-medium">{formatHM(c.hours)}</span>
+                      <span className="font-metric-sm text-metric-sm text-on-surface-variant">{formatMoney(c.amount)}</span>
+                    </div>
+                  </div>
+                  <div className="w-full h-1.5 rounded bg-surface-container-low overflow-hidden">
+                    <div className="h-full bg-secondary rounded" style={{ width: `${Math.max(2, pct)}%` }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Insight callout */}
+      <section className="flex flex-col bg-secondary-fixed text-on-secondary-fixed rounded-xl p-space-lg space-y-2 relative overflow-hidden shadow-sm">
+        <div className="flex items-center space-x-1.5">
+          <span className="material-symbols-outlined text-[18px] text-secondary">insights</span>
+          <span className="font-headline-md text-headline-md tracking-tight">时间精算洞察</span>
+        </div>
+        <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
+          本{period}每工作 <span className="font-metric-sm text-metric-sm font-semibold">1 小时</span>，即有{' '}
+          <span className="font-metric-sm text-metric-sm text-secondary font-semibold">
+            {(exhaustionRatio / 100 * 60).toFixed(1)} 分钟
+          </span>{' '}
+          用于支付{categoryStats[0]?.category || '日常'}等开销。你的财务自由度指数为{' '}
+          <span className="font-metric-sm text-metric-sm font-semibold">{Math.max(0, freedomRatio).toFixed(1)}%</span>。
+        </p>
+        <div className="flex items-center justify-between pt-2">
+          <span className="font-label-mono text-label-mono text-on-secondary-fixed-variant">时账精算引擎 · 数据已校准</span>
+        </div>
+      </section>
     </div>
   )
 }

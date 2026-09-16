@@ -81,7 +81,7 @@ export function FilterSheet({ open, onClose, filters, onApply, expenseCategories
                     draft.category === c.key ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant'
                   }`}
                 >
-                  <span>{c.icon}</span>
+                  <span className="material-symbols-outlined text-[15px]">{c.icon}</span>
                   {c.key}
                 </button>
               ))}

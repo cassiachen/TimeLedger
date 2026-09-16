@@ -30,6 +30,17 @@ export function formatDurationShort(hours: number): string {
   return `${hours.toFixed(1)}小时`
 }
 
+/** 紧凑 "2h 45m" / "37m" 格式，用于 Ledger 风格的大号计时展示 */
+export function formatHM(hours: number): string {
+  if (!isFinite(hours) || hours <= 0) return '0m'
+  const totalMinutes = Math.round(hours * 60)
+  const h = Math.floor(totalMinutes / 60)
+  const m = totalMinutes % 60
+  if (h <= 0) return `${m}m`
+  if (m === 0) return `${h}h`
+  return `${h}h ${m}m`
+}
+
 export function formatMoney(amount: number): string {
   const sign = amount < 0 ? '-' : ''
   return `${sign}¥${Math.abs(amount).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`

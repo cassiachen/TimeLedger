@@ -1,9 +1,9 @@
-import { useLedger } from '../store/LedgerContext'
-import { useUI } from '../store/UIContext'
 import { getCategoryIcon } from '../lib/categories'
 import { formatTime } from '../lib/date'
 import { amountToHours, formatDurationShort, formatMoney } from '../lib/time-value'
 import type { Transaction } from '../lib/types'
+import { useLedger } from '../store/LedgerContext'
+import { useUI } from '../store/UIContext'
 
 export function TransactionRow({ txn }: { txn: Transaction }) {
   const { expenseCategories, incomeCategories, hourlyWage } = useLedger()
@@ -18,50 +18,72 @@ export function TransactionRow({ txn }: { txn: Transaction }) {
     : getCategoryIcon(isExpense ? expenseCategories : incomeCategories, txn.category)
 
   const title = txn.merchant || txn.category || (isTransfer ? '转账' : '记录')
-  const subtitleParts = [
-    !isTransfer && txn.category ? txn.category : null,
-    isTransfer ? `${txn.account} → ${txn.toAccount}` : txn.account,
-    txn.note,
-  ].filter(Boolean)
+  const metaParts = [formatTime(txn.timestamp), isTransfer ? `${txn.account} → ${txn.toAccount}` : txn.account].filter(
+    Boolean
+  )
 
-  const amountColor = isIncome ? 'text-income' : isTransfer ? 'text-on-surface-variant' : 'text-primary'
-  const amountPrefix = isIncome ? '+' : isTransfer ? '' : '-'
+  const hours = amountToHours(txn.amount, hourlyWage)
+  const prominent = hours >= 1
 
   return (
     <button
       onClick={() => openEditModal(txn)}
-      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-colors text-left"
+      className="group w-full flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors text-left"
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <span className="text-lg w-6 text-center flex-shrink-0">
-          {isTransfer ? (
-            <span className="material-symbols-outlined text-[20px] text-outline align-middle">{icon}</span>
-          ) : (
-            icon
-          )}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-[15px] text-primary truncate">{title}</div>
-          {subtitleParts.length > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-outline truncate">
-              {subtitleParts.map((p, i) => (
-                <span key={i} className="truncate">
-                  {i > 0 ? '· ' : ''}
-                  {p}
-                </span>
-              ))}
-            </div>
-          )}
+      <div className="flex items-center gap-space-md min-w-0">
+        <div
+          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+            isIncome ? 'bg-primary-fixed text-primary-container' : 'bg-surface-container text-on-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[20px]">{icon}</span>
+        </div>
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={`font-body-md text-body-md text-on-surface truncate ${isIncome ? 'font-semibold' : 'font-medium'}`}>
+              {title}
+            </span>
+            {!isTransfer && txn.category && (
+              <span className="px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono text-label-mono shrink-0">
+                {txn.category}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 mt-0.5 font-label-mono text-label-mono text-outline truncate">
+            {metaParts.map((p, i) => (
+              <span key={i} className="truncate">
+                {i > 0 ? '· ' : ''}
+                {p}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="text-right flex-shrink-0 pl-2">
-        <div className={`text-[15px] font-medium ${amountColor}`}>
-          {amountPrefix}
+      <div className="flex flex-col items-end shrink-0 pl-2">
+        {isExpense && (
+          <div
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-metric-sm text-metric-sm font-semibold ${
+              prominent ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-surface-container text-on-surface-variant'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[13px]">{prominent ? 'hourglass_bottom' : 'schedule'}</span>
+            <span>-{formatDurationShort(hours)}</span>
+          </div>
+        )}
+        {isIncome && (
+          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-metric-sm text-metric-sm font-semibold">
+            <span className="material-symbols-outlined text-[13px] text-outline">history_toggle_off</span>
+            <span>+{formatDurationShort(hours)}</span>
+          </div>
+        )}
+        <span
+          className={`font-metric-sm text-metric-sm mt-1 ${
+            isIncome ? 'text-on-surface font-medium' : 'text-on-surface-variant'
+          }`}
+        >
+          {isIncome ? '+' : isExpense ? '' : ''}
           {formatMoney(txn.amount)}
-        </div>
-        <div className="text-xs text-outline/70">
-          {isExpense ? formatDurationShort(amountToHours(txn.amount, hourlyWage)) : formatTime(txn.timestamp)}
-        </div>
+        </span>
       </div>
     </button>
   )

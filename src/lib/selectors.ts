@@ -47,6 +47,21 @@ export function getMonthTotals(txns: Transaction[], hourlyWage: number, monthKey
   return computeTotals(filterByMonth(txns, monthKey), hourlyWage)
 }
 
+export function getWeekTotals(txns: Transaction[], hourlyWage: number) {
+  const since = Date.now() - 6 * 24 * 60 * 60 * 1000
+  const startOfDay = new Date(since)
+  startOfDay.setHours(0, 0, 0, 0)
+  return computeTotals(txns.filter((t) => t.timestamp >= startOfDay.getTime()), hourlyWage)
+}
+
+export function getYearTotals(txns: Transaction[], hourlyWage: number) {
+  const year = new Date().getFullYear()
+  return computeTotals(
+    txns.filter((t) => new Date(t.timestamp).getFullYear() === year),
+    hourlyWage
+  )
+}
+
 export interface CategoryStat {
   category: string
   amount: number
