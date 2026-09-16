@@ -12,12 +12,23 @@ interface UIContextValue {
   openAddModal: (type?: TransactionType) => void
   openEditModal: (txn: Transaction) => void
   closeAddModal: () => void
+  toast: string | null
+  showToast: (message: string) => void
 }
 
 const UIContext = createContext<UIContextValue | null>(null)
 
+let toastTimer: ReturnType<typeof setTimeout> | null = null
+
 export function UIProvider({ children }: { children: ReactNode }) {
   const [addModal, setAddModal] = useState<AddModalState>({ open: false, type: 'expense', editing: null })
+  const [toast, setToast] = useState<string | null>(null)
+
+  function showToast(message: string) {
+    if (toastTimer) clearTimeout(toastTimer)
+    setToast(message)
+    toastTimer = setTimeout(() => setToast(null), 2200)
+  }
 
   function openAddModal(type: TransactionType = 'expense') {
     setAddModal({ open: true, type, editing: null })
@@ -32,7 +43,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <UIContext.Provider value={{ addModal, openAddModal, openEditModal, closeAddModal }}>
+    <UIContext.Provider value={{ addModal, openAddModal, openEditModal, closeAddModal, toast, showToast }}>
       {children}
     </UIContext.Provider>
   )

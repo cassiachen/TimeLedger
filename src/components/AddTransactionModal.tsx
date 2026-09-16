@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ACCOUNTS } from '../lib/categories'
 import { fromDatetimeLocalValue, toDatetimeLocalValue } from '../lib/date'
-import { amountToHours, formatDuration } from '../lib/time-value'
+import { amountToHours, formatDuration, formatMoney } from '../lib/time-value'
 import type { TransactionType } from '../lib/types'
 import { useLedger } from '../store/LedgerContext'
 import { useUI } from '../store/UIContext'
@@ -13,7 +13,7 @@ const TYPE_TABS: { key: TransactionType; label: string }[] = [
 ]
 
 export function AddTransactionModal() {
-  const { addModal, closeAddModal } = useUI()
+  const { addModal, closeAddModal, showToast } = useUI()
   const { expenseCategories, incomeCategories, addCustomExpenseCategory, addTransaction, updateTransaction, deleteTransaction, hourlyWage } =
     useLedger()
 
@@ -72,12 +72,15 @@ export function AddTransactionModal() {
       addTransaction(payload)
     }
     closeAddModal()
+    const verb = isEditing ? '已更新' : '已保存'
+    showToast(`✓ ${verb} ${formatMoney(payload.amount)}`)
   }
 
   function handleDelete() {
     if (addModal.editing) {
       deleteTransaction(addModal.editing.id)
       closeAddModal()
+      showToast('✓ 已删除这条记录')
     }
   }
 
