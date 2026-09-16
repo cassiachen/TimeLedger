@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { getHourlyWage } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
+import { useUI } from '../store/UIContext'
 
 const INCOME_PRESETS = [6000, 8000, 12000, 20000]
 const HOURS_PRESETS = [7.5, 8.0, 9.0, 10.0]
 
 export function Settings() {
   const { wageSettings, setWageSettings } = useLedger()
+  const { askConfirm } = useUI()
   const [monthlyIncome, setMonthlyIncome] = useState(wageSettings.monthlyIncome)
   const [workDays, setWorkDays] = useState(wageSettings.workDays)
   const [workHours, setWorkHours] = useState(wageSettings.workHoursPerDay)
@@ -35,10 +37,11 @@ export function Settings() {
   }
 
   function handleResetDemoData() {
-    if (!confirm('确定要清空当前数据，并重新生成一份演示流水吗？')) return
-    localStorage.removeItem('tl_transactions')
-    localStorage.removeItem('tl_seeded')
-    location.reload()
+    askConfirm('确定要清空当前数据，并重新生成一份演示流水吗？', () => {
+      localStorage.removeItem('tl_transactions')
+      localStorage.removeItem('tl_seeded')
+      location.reload()
+    }, '清空并重置')
   }
 
   return (

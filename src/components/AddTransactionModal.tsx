@@ -13,7 +13,7 @@ const TYPE_TABS: { key: TransactionType; label: string }[] = [
 ]
 
 export function AddTransactionModal() {
-  const { addModal, closeAddModal, showToast } = useUI()
+  const { addModal, closeAddModal, showToast, askConfirm } = useUI()
   const { expenseCategories, incomeCategories, addCustomExpenseCategory, addTransaction, updateTransaction, deleteTransaction, hourlyWage } =
     useLedger()
 
@@ -77,11 +77,13 @@ export function AddTransactionModal() {
   }
 
   function handleDelete() {
-    if (addModal.editing) {
-      deleteTransaction(addModal.editing.id)
+    if (!addModal.editing) return
+    const id = addModal.editing.id
+    askConfirm('确定要删除这条记录吗？', () => {
+      deleteTransaction(id)
       closeAddModal()
       showToast('✓ 已删除这条记录')
-    }
+    })
   }
 
   function handleAddCustomCategory() {

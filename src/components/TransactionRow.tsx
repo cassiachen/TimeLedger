@@ -6,8 +6,8 @@ import { useLedger } from '../store/LedgerContext'
 import { useUI } from '../store/UIContext'
 
 export function TransactionRow({ txn }: { txn: Transaction }) {
-  const { expenseCategories, incomeCategories, hourlyWage } = useLedger()
-  const { openEditModal } = useUI()
+  const { expenseCategories, incomeCategories, hourlyWage, deleteTransaction } = useLedger()
+  const { openEditModal, showToast, askConfirm } = useUI()
 
   const isExpense = txn.type === 'expense'
   const isIncome = txn.type === 'income'
@@ -25,10 +25,18 @@ export function TransactionRow({ txn }: { txn: Transaction }) {
   const hours = amountToHours(txn.amount, hourlyWage)
   const prominent = hours >= 1
 
+  function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation()
+    askConfirm(`确定要删除「${title}」这条记录吗？`, () => {
+      deleteTransaction(txn.id)
+      showToast('✓ 已删除这条记录')
+    })
+  }
+
   return (
-    <button
+    <div
       onClick={() => openEditModal(txn)}
-      className="group w-full flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors text-left"
+      className="group w-full flex items-center justify-between p-space-md hover:bg-surface-container-low transition-colors text-left cursor-pointer"
     >
       <div className="flex items-center gap-space-md min-w-0">
         <div
@@ -59,32 +67,41 @@ export function TransactionRow({ txn }: { txn: Transaction }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-end shrink-0 pl-2">
-        {isExpense && (
-          <div
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-metric-sm text-metric-sm font-semibold ${
-              prominent ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-surface-container text-on-surface-variant'
+      <div className="flex items-center gap-1 shrink-0 pl-2">
+        <div className="flex flex-col items-end shrink-0">
+          {isExpense && (
+            <div
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-metric-sm text-metric-sm font-semibold ${
+                prominent ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-surface-container text-on-surface-variant'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[13px]">{prominent ? 'hourglass_bottom' : 'schedule'}</span>
+              <span>-{formatDurationShort(hours)}</span>
+            </div>
+          )}
+          {isIncome && (
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-metric-sm text-metric-sm font-semibold">
+              <span className="material-symbols-outlined text-[13px] text-outline">history_toggle_off</span>
+              <span>+{formatDurationShort(hours)}</span>
+            </div>
+          )}
+          <span
+            className={`font-metric-sm text-metric-sm mt-1 ${
+              isIncome ? 'text-on-surface font-medium' : 'text-on-surface-variant'
             }`}
           >
-            <span className="material-symbols-outlined text-[13px]">{prominent ? 'hourglass_bottom' : 'schedule'}</span>
-            <span>-{formatDurationShort(hours)}</span>
-          </div>
-        )}
-        {isIncome && (
-          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-metric-sm text-metric-sm font-semibold">
-            <span className="material-symbols-outlined text-[13px] text-outline">history_toggle_off</span>
-            <span>+{formatDurationShort(hours)}</span>
-          </div>
-        )}
-        <span
-          className={`font-metric-sm text-metric-sm mt-1 ${
-            isIncome ? 'text-on-surface font-medium' : 'text-on-surface-variant'
-          }`}
+            {isIncome ? '+' : isExpense ? '' : ''}
+            {formatMoney(txn.amount)}
+          </span>
+        </div>
+        <button
+          onClick={handleDelete}
+          className="w-7 h-7 flex items-center justify-center rounded-full text-outline/50 hover:text-error hover:bg-error-container/40 transition-colors shrink-0"
+          aria-label="删除"
         >
-          {isIncome ? '+' : isExpense ? '' : ''}
-          {formatMoney(txn.amount)}
-        </span>
+          <span className="material-symbols-outlined text-[17px]">delete</span>
+        </button>
       </div>
-    </button>
+    </div>
   )
 }

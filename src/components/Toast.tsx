@@ -1,17 +1,32 @@
 import { useUI } from '../store/UIContext'
 
 export function Toast() {
-  const { toast } = useUI()
+  const { toast, dismissToast } = useUI()
 
   return (
     <div
-      className={`fixed left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 z-[300] transition-all duration-300 ${
-        toast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+      className={`fixed inset-0 z-[300] flex items-center justify-center px-8 transition-opacity duration-200 ${
+        toast ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
-      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 84px)' }}
+      style={{ background: 'rgba(0,0,0,0.25)' }}
+      onClick={dismissToast}
     >
-      <span className="material-symbols-outlined text-[18px] text-secondary-fixed">check_circle</span>
-      <span className="font-body-sm text-body-sm font-medium">{toast}</span>
+      <div
+        className={`bg-surface-container-lowest rounded-xl shadow-lg px-6 py-6 flex flex-col items-center gap-3 max-w-[280px] w-full transition-transform duration-200 ${
+          toast ? 'scale-100' : 'scale-95'
+        }`}
+      >
+        <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center">
+          <span className="material-symbols-outlined text-secondary text-[26px]">check_circle</span>
+        </div>
+        <span className="font-body-lg text-body-lg text-on-surface font-medium text-center">{toast}</span>
+        <button
+          onClick={dismissToast}
+          className="mt-1 w-full h-10 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md font-medium active:scale-[0.98] transition-transform"
+        >
+          好的
+        </button>
+      </div>
     </div>
   )
 }

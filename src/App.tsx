@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AddTransactionModal } from './components/AddTransactionModal'
 import { BottomNav } from './components/BottomNav'
+import { ConfirmDialog } from './components/ConfirmDialog'
 import { OnboardingModal } from './components/OnboardingModal'
 import { Toast } from './components/Toast'
 import { TopBar } from './components/TopBar'
@@ -38,6 +39,7 @@ function Shell() {
       <AddTransactionModal />
       <OnboardingModal />
       <Toast />
+      <ConfirmDialog />
     </div>
   )
 }
