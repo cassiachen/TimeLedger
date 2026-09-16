@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useLedger } from '../store/LedgerContext'
 
 interface TopBarProps {
@@ -20,10 +21,13 @@ export function TopBar({ subtitle }: TopBarProps) {
           </div>
         </div>
         <div className="flex items-center gap-space-sm">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-fixed shadow-[0_1px_4px_rgba(155,69,0,0.06)]">
+          <Link
+            to="/settings"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-fixed shadow-[0_1px_4px_rgba(155,69,0,0.06)]"
+          >
             <span className="material-symbols-outlined text-[14px] text-secondary">schedule</span>
             <span className="font-metric-sm text-metric-sm font-medium">¥{hourlyWage.toFixed(1)}/h</span>
-          </div>
+          </Link>
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
           </div>

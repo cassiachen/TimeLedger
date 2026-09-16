@@ -192,7 +192,6 @@ export function Bills() {
             <span className="font-label-mono text-label-mono tracking-widest uppercase">
               已加载全部 {filtered.length} 笔时间账目
             </span>
-            <span className="font-body-sm text-body-sm text-on-surface-variant">「生命有限，每笔开支都是时间的置换」</span>
           </div>
         </div>
       )}

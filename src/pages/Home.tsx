@@ -29,27 +29,16 @@ export function Home() {
   return (
     <div className="flex flex-col w-full gap-space-lg">
       {/* Top Greeting & Chrono Meta */}
-      <section className="flex items-center justify-between pt-space-xs">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-            <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
-              CHRONO DIAL · LIVE
-            </span>
-          </div>
-          <h2 className="font-headline-md text-headline-md text-on-surface mt-0.5 tracking-tight">
-            {formatFullDate(Date.now())}
-          </h2>
-        </div>
-        <Link
-          to="/settings"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant group"
-        >
-          <span className="font-metric-sm text-metric-sm font-medium text-on-surface">¥{hourlyWage.toFixed(2)}/h</span>
-          <span className="material-symbols-outlined text-[15px] text-outline group-hover:text-on-surface transition-transform group-hover:rotate-45">
-            tune
+      <section className="flex flex-col pt-space-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+          <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
+            CHRONO DIAL · LIVE
           </span>
-        </Link>
+        </div>
+        <h2 className="font-headline-md text-headline-md text-on-surface mt-0.5 tracking-tight">
+          {formatFullDate(Date.now())}
+        </h2>
       </section>
 
       {/* Hero Time-Cost Ledger Module */}
@@ -57,17 +46,11 @@ export function Home() {
         <div className="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
         <div className="absolute left-1/3 bottom-0 w-32 h-32 rounded-full bg-primary-fixed-dim/5 blur-xl pointer-events-none" />
         <div className="relative flex flex-col gap-space-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">timelapse</span>
-              <span className="font-label-md text-label-md text-on-primary-container tracking-wider uppercase">
-                今日生命工时扣除
-              </span>
-            </div>
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary/20 text-secondary-fixed">
-              <span className="material-symbols-outlined text-[12px]">hourglass_bottom</span>
-              <span className="font-label-mono text-label-mono">TEMPORAL OUTLAY</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-secondary text-[20px]">timelapse</span>
+            <span className="font-label-md text-label-md text-on-primary-container tracking-wider uppercase">
+              今日生命工时扣除
+            </span>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
@@ -149,9 +132,7 @@ export function Home() {
       <section className="flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <h3 className="font-headline-md text-headline-md text-on-surface">今日账单</h3>
-          <span className="font-label-mono text-label-mono text-on-surface-variant">
-            {todayTxns.length} 笔交易 · 累计支出 {formatHM(todayTotals.expenseHours)}
-          </span>
+          <span className="font-label-mono text-label-mono text-on-surface-variant">{todayTxns.length} 笔交易</span>
         </div>
         <Link to="/bills" className="p-1 rounded text-outline hover:text-on-surface transition-colors flex items-center justify-center">
           <span className="material-symbols-outlined text-[20px]">filter_list</span>
@@ -175,9 +156,7 @@ export function Home() {
         </div>
         <div className="flex flex-col">
           <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            每笔消费都在换算你的人生工时 · 今日已消耗标准工作日的{' '}
-            <span className="font-metric-sm text-metric-sm text-secondary font-semibold">{ratio.toFixed(1)}%</span>
-            。每一刻选择，皆在重构生命资产。
+            每笔消费都在换算你的人生工时，每一刻选择，皆在重构生命资产。
           </p>
           <div className="flex items-center gap-1 mt-1.5">
             <span className="material-symbols-outlined text-outline text-[13px]">verified</span>

@@ -78,29 +78,21 @@ export function Stats() {
 
       {/* Hero card */}
       <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
-        <div className="flex items-start justify-between">
-          <div className="flex flex-col space-y-1">
-            <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
-              Temporal Capital Exhaustion
+        <div className="flex flex-col space-y-1">
+          <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
+            Temporal Capital Exhaustion
+          </span>
+          <div className="flex items-baseline space-x-1.5">
+            <span className="font-display-lg-mobile text-display-lg-mobile text-on-surface tracking-tight">
+              {totals.expenseHours.toFixed(1)}
             </span>
-            <div className="flex items-baseline space-x-1.5">
-              <span className="font-display-lg-mobile text-display-lg-mobile text-on-surface tracking-tight">
-                {totals.expenseHours.toFixed(1)}
-              </span>
-              <span className="font-metric-md text-metric-md text-secondary font-medium">小时</span>
-            </div>
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              {periodLabel}消耗相当于占标准工时{' '}
-              <span className="font-metric-sm text-metric-sm text-on-surface font-medium">{standardHours.toFixed(0)}h</span> 的{' '}
-              <span className="font-metric-sm text-metric-sm text-secondary font-medium">{exhaustionRatio.toFixed(1)}%</span>
-            </span>
+            <span className="font-metric-md text-metric-md text-secondary font-medium">小时</span>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="inline-flex items-center px-2 py-1 rounded bg-secondary-fixed text-on-secondary-fixed font-metric-sm text-metric-sm">
-              <span className="material-symbols-outlined text-[13px] mr-1 text-secondary">payments</span>
-              {formatMoney(totals.expense)}
-            </span>
-          </div>
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            {periodLabel}消耗相当于占标准工时{' '}
+            <span className="font-metric-sm text-metric-sm text-on-surface font-medium">{standardHours.toFixed(0)}h</span> 的{' '}
+            <span className="font-metric-sm text-metric-sm text-secondary font-medium">{exhaustionRatio.toFixed(1)}%</span>
+          </span>
         </div>
 
         <div className="flex flex-col space-y-1.5 pt-1">
@@ -108,11 +100,7 @@ export function Stats() {
             <div className="h-full bg-secondary transition-all duration-700" style={{ width: `${exhaustionRatio}%` }} />
             <div className="h-full bg-surface-container-highest" style={{ width: `${100 - exhaustionRatio}%` }} />
           </div>
-          <div className="flex items-center justify-between font-label-mono text-label-mono text-on-surface-variant">
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary inline-block" />
-              已耗工时 {totals.expenseHours.toFixed(1)}h
-            </span>
+          <div className="flex items-center justify-end font-label-mono text-label-mono text-on-surface-variant">
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-surface-variant inline-block" />
               剩余自由工时 {Math.max(0, standardHours - totals.expenseHours).toFixed(1)}h
