@@ -1,0 +1,45 @@
+import type { WageSettings } from './types'
+
+export function getHourlyWage(settings: WageSettings): number {
+  const totalHours = settings.workDays * settings.workHoursPerDay
+  if (!totalHours) return 0
+  return settings.monthlyIncome / totalHours
+}
+
+/** 金额换算成小时数 */
+export function amountToHours(amount: number, hourlyWage: number): number {
+  if (!hourlyWage) return 0
+  return amount / hourlyWage
+}
+
+/** 小时数格式化成 "X小时Y分钟" / "Y分钟"，用于展示时间成本 */
+export function formatDuration(hours: number): string {
+  if (!isFinite(hours) || hours <= 0) return '0分钟'
+  const totalMinutes = Math.round(hours * 60)
+  const h = Math.floor(totalMinutes / 60)
+  const m = totalMinutes % 60
+  if (h <= 0) return `${m}分钟`
+  if (m === 0) return `${h}小时`
+  return `${h}小时${m}分钟`
+}
+
+/** 简短格式，用于账单行内展示，如 "37分钟" / "2.3小时" */
+export function formatDurationShort(hours: number): string {
+  if (!isFinite(hours) || hours <= 0) return '0分钟'
+  if (hours < 1) return `${Math.round(hours * 60)}分钟`
+  return `${hours.toFixed(1)}小时`
+}
+
+export function formatMoney(amount: number): string {
+  const sign = amount < 0 ? '-' : ''
+  return `${sign}¥${Math.abs(amount).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+}
+
+export function formatPercentChange(current: number, previous: number): string {
+  if (previous === 0) {
+    return current === 0 ? '—' : '+100%'
+  }
+  const diff = ((current - previous) / previous) * 100
+  const str = `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`
+  return str
+}
