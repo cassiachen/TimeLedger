@@ -32,7 +32,8 @@ export function Bills() {
       .map(([dayKey, txns]) => {
         const income = txns.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
         const expense = txns.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
-        return { dayKey, txns: txns.slice().sort((a, b) => b.timestamp - a.timestamp), income, expense }
+        // txns 已经在 `filtered` 里按当前排序模式排好了，这里保持原样，不要再按时间重排一遍
+        return { dayKey, txns, income, expense }
       })
   }, [filtered])
 

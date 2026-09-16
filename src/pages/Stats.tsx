@@ -40,6 +40,9 @@ export function Stats() {
   const standardHours = standardHoursByPeriod[period] || 1
   const exhaustionRatio = Math.min(100, (totals.expenseHours / standardHours) * 100)
 
+  const PERIOD_LABEL: Record<Period, string> = { '周': '本周', '月': '本月', '年': '本年', '自定义': '本期间' }
+  const periodLabel = PERIOD_LABEL[period]
+
   const categoryStats = useMemo(() => {
     const currentMonth = getCurrentMonthKey()
     const thisMonthTxns = transactions.filter((t) => getMonthKey(t.timestamp) === currentMonth)
@@ -87,7 +90,7 @@ export function Stats() {
               <span className="font-metric-md text-metric-md text-secondary font-medium">小时</span>
             </div>
             <span className="font-body-sm text-body-sm text-on-surface-variant">
-              本{period}消耗相当于占标准工时{' '}
+              {periodLabel}消耗相当于占标准工时{' '}
               <span className="font-metric-sm text-metric-sm text-on-surface font-medium">{standardHours.toFixed(0)}h</span> 的{' '}
               <span className="font-metric-sm text-metric-sm text-secondary font-medium">{exhaustionRatio.toFixed(1)}%</span>
             </span>
@@ -217,7 +220,7 @@ export function Stats() {
           <span className="font-headline-md text-headline-md tracking-tight">时间精算洞察</span>
         </div>
         <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
-          本{period}每工作 <span className="font-metric-sm text-metric-sm font-semibold">1 小时</span>，即有{' '}
+          {periodLabel}每工作 <span className="font-metric-sm text-metric-sm font-semibold">1 小时</span>，即有{' '}
           <span className="font-metric-sm text-metric-sm text-secondary font-semibold">
             {(exhaustionRatio / 100 * 60).toFixed(1)} 分钟
           </span>{' '}
