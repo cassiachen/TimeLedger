@@ -46,7 +46,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
   function showToast(message: string) {
     if (toastTimer) clearTimeout(toastTimer)
     setToast(message)
-    toastTimer = setTimeout(() => setToast(null), 2000)
+    toastTimer = setTimeout(() => setToast(null), 1100)
   }
 
   function dismissToast() {
