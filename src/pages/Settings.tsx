@@ -59,7 +59,12 @@ export function Settings() {
   }, [wageSettings])
 
   const effectiveHours = workHours + commuteHours
-  const inputsValid = monthlyIncome > 0 && workDays > 0 && workDays <= 31 && workHours > 0 && effectiveHours <= 24
+  const commuteTooLong = commuteField.value > 6
+  const errors: string[] = []
+  if (commuteTooLong) errors.push('每日往返通勤最多填 6 小时')
+  if (workDays > 31) errors.push('每月工作天数不能超过 31 天')
+  if (workHours > 24 || effectiveHours > 24) errors.push('每天工作时长加通勤不能超过 24 小时')
+  const inputsValid = monthlyIncome > 0 && workDays > 0 && workHours > 0 && errors.length === 0
   const hourlyRate = getHourlyWage({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
   const minuteRate = hourlyRate / 60
 
@@ -332,7 +337,9 @@ export function Settings() {
         <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <label className="font-headline-md text-body-lg text-on-surface font-medium">每日往返通勤</label>
-            <span className="font-label-mono text-label-mono text-on-surface-variant">0 表示不计入</span>
+            <span className={`font-label-mono text-label-mono ${commuteTooLong ? "text-error" : "text-on-surface-variant"}`}>
+              {commuteTooLong ? "最多 6 小时" : "0 表示不计入"}
+            </span>
           </div>
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1 h-12 bg-surface-container-low rounded flex items-center justify-center gap-1.5 px-4">
@@ -374,9 +381,13 @@ export function Settings() {
           <span className="material-symbols-outlined text-[20px]">check_circle</span>
           <span>{saved ? '已保存' : '保存'}</span>
         </button>
-        <p className="font-label-mono text-label-mono text-center text-on-surface-variant mt-2.5">
-          保存后，所有账单都会按 ¥{hourlyRate.toFixed(2)}/h 重新换算
-        </p>
+        {errors.length > 0 ? (
+          <p className="font-label-mono text-label-mono text-center text-error mt-2.5">{errors[0]}，请修改后再保存</p>
+        ) : (
+          <p className="font-label-mono text-label-mono text-center text-on-surface-variant mt-2.5">
+            保存后，所有账单都会按 ¥{hourlyRate.toFixed(2)}/h 重新换算
+          </p>
+        )}
       </div>
 
       {/* Data management */}
