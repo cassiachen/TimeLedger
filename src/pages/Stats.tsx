@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { DayBreakdown } from '../components/DayBreakdown'
 import { MonthCalendar } from '../components/MonthCalendar'
 import { getCategoryIcon } from '../lib/categories'
 import { getCurrentMonthKey, getMonthKey } from '../lib/date'
@@ -127,6 +128,8 @@ export function Stats() {
           </div>
         </div>
       </section>
+
+      <DayBreakdown />
 
       <MonthCalendar />
 

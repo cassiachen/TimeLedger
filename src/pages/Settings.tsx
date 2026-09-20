@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getItem, setItem } from '../lib/storage'
-import { getHourlyWage } from '../lib/time-value'
+import { DEFAULT_MEAL_HOURS, DEFAULT_SLEEP_HOURS, getHourlyWage } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 import { useUI } from '../store/UIContext'
 
@@ -44,6 +44,8 @@ export function Settings() {
   const daysField = useNumField(wageSettings.workDays)
   const hoursField = useNumField(wageSettings.workHoursPerDay)
   const commuteField = useNumField(wageSettings.commuteHours || 0)
+  const sleepField = useNumField(wageSettings.sleepHours ?? DEFAULT_SLEEP_HOURS)
+  const mealField = useNumField(wageSettings.mealHours ?? DEFAULT_MEAL_HOURS)
   const { value: monthlyIncome, setValue: setMonthlyIncome } = incomeField
   const { value: workDays, setValue: setWorkDays } = daysField
   const { value: workHours, setValue: setWorkHours } = hoursField
@@ -56,6 +58,8 @@ export function Settings() {
     setWorkDays(wageSettings.workDays)
     setWorkHours(wageSettings.workHoursPerDay)
     setCommuteHours(wageSettings.commuteHours || 0)
+    sleepField.setValue(wageSettings.sleepHours ?? DEFAULT_SLEEP_HOURS)
+    mealField.setValue(wageSettings.mealHours ?? DEFAULT_MEAL_HOURS)
   }, [wageSettings])
 
   const effectiveHours = workHours + commuteHours
@@ -64,6 +68,8 @@ export function Settings() {
   if (commuteTooLong) errors.push('每日往返通勤最多填 6 小时')
   if (workDays > 31) errors.push('每月工作天数不能超过 31 天')
   if (workHours > 24 || effectiveHours > 24) errors.push('每天工作时长加通勤不能超过 24 小时')
+  const freeHours = 24 - sleepField.value - mealField.value - effectiveHours
+  if (sleepField.value > 24 || mealField.value > 24 || freeHours < 0) errors.push('睡觉、吃饭、工作和通勤加起来不能超过 24 小时')
   const inputsValid = monthlyIncome > 0 && workDays > 0 && workHours > 0 && errors.length === 0
   const hourlyRate = getHourlyWage({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
   const minuteRate = hourlyRate / 60
@@ -99,7 +105,14 @@ export function Settings() {
   }
 
   function handleSave() {
-    setWageSettings({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
+    setWageSettings({
+      monthlyIncome,
+      workDays,
+      workHoursPerDay: workHours,
+      commuteHours,
+      sleepHours: sleepField.value,
+      mealHours: mealField.value,
+    })
     setSaved(true)
     setTimeout(() => setSaved(false), 2400)
   }
@@ -368,6 +381,42 @@ export function Settings() {
                 {val}h
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <label className="font-headline-md text-body-lg text-on-surface font-medium">每天的时间分配</label>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">按工作日算</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            {[
+              { label: '睡觉', field: sleepField },
+              { label: '吃饭', field: mealField },
+            ].map(({ label, field }) => (
+              <div key={label}>
+                <span className="font-label-md text-label-md text-on-surface-variant block mb-1">{label}</span>
+                <div className="h-12 bg-surface-container-low rounded flex items-center justify-center gap-1.5 px-3">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={field.text}
+                    onChange={(e) => field.setText(e.target.value)}
+                    step={0.5}
+                    min={0}
+                    max={24}
+                    className="bg-transparent text-center font-metric-lg text-metric-lg text-on-surface w-14 focus:outline-none"
+                  />
+                  <span className="font-body-sm text-body-sm text-on-surface-variant">小时</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className={`rounded p-3 flex justify-between items-center ${freeHours < 0 ? 'bg-error-container' : 'bg-secondary-fixed/50'}`}>
+            <span className="font-body-sm text-body-sm text-on-secondary-fixed">扣掉工作和通勤，剩下属于自己的</span>
+            <span className="font-metric-md text-metric-md font-semibold text-on-secondary-fixed">
+              {freeHours.toFixed(1)} 小时
+            </span>
           </div>
         </div>
       </div>
