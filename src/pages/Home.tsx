@@ -4,7 +4,7 @@ import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
 import { buildDayReport } from '../lib/earnings'
 import { filterByDay, getTodayTotals } from '../lib/selectors'
-import { amountToHours, formatHM, formatMoney, getDailyHours } from '../lib/time-value'
+import { amountToHours, formatHM, formatMoney, getDailyHours, getDayBreakdown } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 export function Home() {
@@ -25,6 +25,8 @@ export function Home() {
   })
   const incomeTotal = todayReport.workIncome + todayReport.extraIncome
   const incomeHours = amountToHours(incomeTotal, hourlyWage)
+  const dayParts = getDayBreakdown(wageSettings)
+  const freeToday = todayReport.isWorkday ? dayParts.free : 24 - dayParts.sleep - dayParts.meals
   const expenseTotal = todayReport.expense
   const net = incomeTotal - expenseTotal
   const netHours = amountToHours(Math.abs(net), hourlyWage)
@@ -90,6 +92,9 @@ export function Home() {
                 title={`今天花掉 ${formatHM(todayTotals.expenseHours)}`}
               />
             </div>
+            <span className="font-label-mono text-label-mono text-on-primary-container">
+              {todayReport.isWorkday ? '工作日' : '休息日'}，今天属于自己的时间约 {Math.max(0, freeToday).toFixed(1)} 小时
+            </span>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-space-sm border-t border-surface-container-highest/10">
