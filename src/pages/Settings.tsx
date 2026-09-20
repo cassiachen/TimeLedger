@@ -1,7 +1,28 @@
 import { useEffect, useState } from 'react'
+import { getItem, setItem } from '../lib/storage'
 import { getHourlyWage } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 import { useUI } from '../store/UIContext'
+
+interface Benchmark {
+  id: string
+  name: string
+  price: number
+  icon: string
+}
+
+const BENCHMARKS_KEY = 'tl_benchmarks'
+const DEFAULT_BENCHMARKS: Benchmark[] = [
+  { id: 'coffee', name: '一杯咖啡', price: 25, icon: 'local_cafe' },
+  { id: 'tea', name: '一杯奶茶', price: 18, icon: 'emoji_food_beverage' },
+  { id: 'movie', name: '一张电影票', price: 60, icon: 'movie' },
+  { id: 'dinner', name: '一顿大餐', price: 200, icon: 'restaurant' },
+  { id: 'shoes', name: '一双运动鞋', price: 800, icon: 'directions_run' },
+  { id: 'flight', name: '一张机票', price: 1500, icon: 'flight_takeoff' },
+  { id: 'airpods', name: '一副耳机', price: 1899, icon: 'headphones' },
+  { id: 'phone', name: '一台手机', price: 5999, icon: 'smartphone' },
+  { id: 'laptop', name: '一台笔记本', price: 8999, icon: 'laptop_mac' },
+]
 
 const INCOME_PRESETS = [6000, 8000, 12000, 20000]
 const HOURS_PRESETS = [7.5, 8.0, 9.0, 10.0]
@@ -27,10 +48,35 @@ export function Settings() {
   const hourlyRate = getHourlyWage({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
   const minuteRate = hourlyRate / 60
 
-  const coffeeMinutes = hourlyRate ? Math.round((25 / hourlyRate) * 60) : 0
-  const dinnerHours = hourlyRate ? 200 / hourlyRate : 0
-  const phoneHours = hourlyRate ? 5999 / hourlyRate : 0
-  const phoneDays = effectiveHours ? phoneHours / effectiveHours : 0
+  const [benchmarks, setBenchmarks] = useState<Benchmark[]>(() =>
+    getItem<Benchmark[]>(BENCHMARKS_KEY, DEFAULT_BENCHMARKS)
+  )
+  const [adding, setAdding] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newPrice, setNewPrice] = useState('')
+
+  useEffect(() => {
+    setItem(BENCHMARKS_KEY, benchmarks)
+  }, [benchmarks])
+
+  function formatCost(price: number): string {
+    if (!hourlyRate) return '—'
+    const hours = price / hourlyRate
+    if (hours < 1) return `${Math.max(1, Math.round(hours * 60))} 分钟`
+    const daily = effectiveHours || 8
+    if (hours < daily) return `${hours.toFixed(1)} 小时`
+    return `${(hours / daily).toFixed(1)} 天`
+  }
+
+  function handleAddBenchmark() {
+    const price = parseFloat(newPrice)
+    const name = newName.trim()
+    if (!name || !(price > 0)) return
+    setBenchmarks((prev) => [...prev, { id: `c-${Date.now()}`, name, price, icon: 'sell' }])
+    setNewName('')
+    setNewPrice('')
+    setAdding(false)
+  }
 
   function handleSave() {
     setWageSettings({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
@@ -87,35 +133,64 @@ export function Settings() {
           <div className="font-label-mono text-label-mono text-on-primary-container uppercase tracking-wider mb-2">
             购买力折算标尺
           </div>
-          <div className="flex items-center justify-between font-body-sm text-body-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[15px] text-secondary-fixed">local_cafe</span>
+          {benchmarks.map((b) => (
+            <div key={b.id} className="flex items-center justify-between gap-2 font-body-sm text-body-sm">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[15px] text-secondary-fixed">{b.icon}</span>
+                </div>
+                <span className="text-on-primary truncate">
+                  {b.name} (¥{b.price.toLocaleString()})
+                </span>
               </div>
-              <span className="text-on-primary">一杯咖啡 (¥25)</span>
-            </div>
-            <span className="font-metric-sm text-metric-sm font-medium text-secondary-fixed">≈ {coffeeMinutes} 分钟工时</span>
-          </div>
-          <div className="flex items-center justify-between font-body-sm text-body-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[15px] text-secondary-fixed">restaurant</span>
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="font-metric-sm text-metric-sm font-medium text-secondary-fixed whitespace-nowrap">
+                  ≈ {formatCost(b.price)}
+                </span>
+                <button
+                  onClick={() => setBenchmarks((prev) => prev.filter((x) => x.id !== b.id))}
+                  className="w-5 h-5 flex items-center justify-center rounded text-on-primary-container hover:text-on-primary"
+                  aria-label={`删除${b.name}`}
+                >
+                  <span className="material-symbols-outlined text-[14px]">close</span>
+                </button>
               </div>
-              <span className="text-on-primary">一顿大餐 (¥200)</span>
             </div>
-            <span className="font-metric-sm text-metric-sm font-medium text-secondary-fixed">≈ {dinnerHours.toFixed(1)} 小时工时</span>
-          </div>
-          <div className="flex items-center justify-between font-body-sm text-body-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[15px] text-secondary-fixed">smartphone</span>
-              </div>
-              <span className="text-on-primary whitespace-nowrap">一台手机 (¥5,999)</span>
+          ))}
+
+          {adding ? (
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="名称，如：一杯拿铁"
+                className="flex-1 min-w-0 h-9 rounded bg-white/10 px-2.5 font-body-sm text-body-sm text-on-primary placeholder:text-on-primary-container focus:outline-none"
+              />
+              <input
+                type="number"
+                inputMode="decimal"
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                placeholder="¥价格"
+                className="w-20 h-9 rounded bg-white/10 px-2.5 font-metric-sm text-metric-sm text-on-primary placeholder:text-on-primary-container focus:outline-none"
+              />
+              <button
+                onClick={handleAddBenchmark}
+                disabled={!newName.trim() || !(parseFloat(newPrice) > 0)}
+                className="h-9 px-3 rounded bg-secondary-container text-on-secondary-container font-label-md text-label-md font-semibold disabled:opacity-40"
+              >
+                添加
+              </button>
             </div>
-            <span className="font-metric-sm text-metric-sm font-medium text-secondary-fixed shrink-0 whitespace-nowrap text-right pl-2">
-              ≈ {phoneHours.toFixed(0)}h ({phoneDays.toFixed(1)}天)
-            </span>
-          </div>
+          ) : (
+            <button
+              onClick={() => setAdding(true)}
+              className="w-full h-9 mt-1 rounded border border-dashed border-on-primary-container/40 text-on-primary-container font-label-md text-label-md flex items-center justify-center gap-1 hover:text-on-primary"
+            >
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              添加自定义物品
+            </button>
+          )}
         </div>
       </div>
 
