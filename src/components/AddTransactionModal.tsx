@@ -9,7 +9,6 @@ import { useUI } from '../store/UIContext'
 const TYPE_TABS: { key: TransactionType; label: string }[] = [
   { key: 'expense', label: '支出' },
   { key: 'income', label: '收入' },
-  { key: 'transfer', label: '转账' },
 ]
 
 export function AddTransactionModal() {
@@ -110,8 +109,8 @@ export function AddTransactionModal() {
           </button>
         </div>
 
-        {/* 类型切换 */}
-        <div className="grid grid-cols-3 gap-2 mb-4 bg-surface-container-low rounded-xl p-1">
+        {/* 类型切换（已有的转账记录只能编辑，不再提供新建入口） */}
+        {type !== "transfer" && <div className="grid grid-cols-2 gap-2 mb-4 bg-surface-container-low rounded-xl p-1">
           {TYPE_TABS.map((tab) => (
             <button
               key={tab.key}
@@ -123,7 +122,7 @@ export function AddTransactionModal() {
               {tab.label}
             </button>
           ))}
-        </div>
+        </div>}
 
         {/* 金额 */}
         <div className="mb-4">
@@ -145,7 +144,7 @@ export function AddTransactionModal() {
             {/* 消费内容 */}
             <div className="mb-4">
               <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
-                {type === 'income' ? '收入内容' : '消费内容'} (可选)
+                {type === 'income' ? '收入内容' : '消费内容'}
               </label>
               <input
                 value={merchant}

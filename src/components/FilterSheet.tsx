@@ -7,7 +7,6 @@ const TYPE_OPTIONS: { key: BillFilters['type']; label: string }[] = [
   { key: 'all', label: '全部' },
   { key: 'expense', label: '支出' },
   { key: 'income', label: '收入' },
-  { key: 'transfer', label: '转账' },
 ]
 
 interface FilterSheetProps {
