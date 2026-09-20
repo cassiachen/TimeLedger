@@ -93,10 +93,34 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     setItem(KEYS.customExpenseCategories, customExpenseCategories)
   }, [customExpenseCategories])
 
+  // 多个标签页同时开着时，另一个页面改了数据就同步过来，避免旧页面把新数据覆盖掉
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.newValue === null) return
+      try {
+        const v = JSON.parse(e.newValue)
+        if (e.key === KEYS.transactions) setTransactions(v)
+        else if (e.key === KEYS.wageSettings) setWageSettingsState(v)
+        else if (e.key === KEYS.customExpenseCategories) setCustomExpenseCategories(v)
+        else if (e.key === KEYS.dayOverrides) setDayOverrides(v)
+        else if (e.key === KEYS.demoCleared) setDemoCleared(v)
+        else if (e.key === KEYS.onboarded) setOnboarded(v)
+      } catch {
+        /* 忽略损坏的数据 */
+      }
+    }
+    window.addEventListener("storage", onStorage)
+    return () => window.removeEventListener("storage", onStorage)
+  }, [])
+
   const hourlyWage = useMemo(() => getHourlyWage(wageSettings), [wageSettings])
 
   const expenseCategories = useMemo(
-    () => [...DEFAULT_EXPENSE_CATEGORIES.slice(0, -1), ...customExpenseCategories, DEFAULT_EXPENSE_CATEGORIES.at(-1)!],
+    () => [
+      ...DEFAULT_EXPENSE_CATEGORIES.slice(0, -1),
+      ...customExpenseCategories.map((c) => ({ ...c, icon: "sell" })),
+      DEFAULT_EXPENSE_CATEGORIES.at(-1)!,
+    ],
     [customExpenseCategories]
   )
 
@@ -121,8 +145,8 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     const trimmed = name.trim()
     if (!trimmed) return
     setCustomExpenseCategories((prev) => {
-      if (prev.some((c) => c.key === trimmed)) return prev
-      return [...prev, { key: trimmed, icon: '🏷️', custom: true }]
+      if ([...DEFAULT_EXPENSE_CATEGORIES, ...prev].some((c) => c.key === trimmed)) return prev
+      return [...prev, { key: trimmed, icon: 'sell', custom: true }]
     })
   }
 

@@ -59,6 +59,7 @@ export function Settings() {
   }, [wageSettings])
 
   const effectiveHours = workHours + commuteHours
+  const inputsValid = monthlyIncome > 0 && workDays > 0 && workDays <= 31 && workHours > 0 && effectiveHours <= 24
   const hourlyRate = getHourlyWage({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
   const minuteRate = hourlyRate / 60
 
@@ -367,7 +368,8 @@ export function Settings() {
       <div className="mt-space-lg">
         <button
           onClick={handleSave}
-          className="w-full h-12 bg-primary text-on-primary font-headline-md text-body-lg font-medium rounded-lg shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform"
+          disabled={!inputsValid}
+          className="w-full h-12 bg-primary text-on-primary font-headline-md text-body-lg font-medium rounded-lg shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform disabled:opacity-40"
         >
           <span className="material-symbols-outlined text-[20px]">check_circle</span>
           <span>{saved ? '已保存' : '保存'}</span>

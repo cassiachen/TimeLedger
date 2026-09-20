@@ -53,7 +53,9 @@ export function Stats() {
   const totalCategoryAmount = categoryStats.reduce((s, c) => s + c.amount, 0) || 1
 
   const trend = useMemo(() => getDailyTrend(transactions, hourlyWage, 18), [transactions, hourlyWage])
-  const dayCount = period === '周' ? 7 : period === '年' ? 365 : 30
+  const now = new Date()
+  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000)
+  const dayCount = period === '周' ? 7 : period === '年' ? dayOfYear : now.getDate()
   const dailyAvgHours = totals.expenseHours / dayCount
   const freedomRatio = 100 - exhaustionRatio
 

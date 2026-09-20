@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ACCOUNTS } from '../lib/categories'
 import { EMPTY_FILTERS, type BillFilters } from '../lib/filters'
 import type { Category, TransactionType } from '../lib/types'
@@ -21,6 +21,10 @@ interface FilterSheetProps {
 
 export function FilterSheet({ open, onClose, filters, onApply, expenseCategories, incomeCategories }: FilterSheetProps) {
   const [draft, setDraft] = useState<BillFilters>(filters)
+
+  useEffect(() => {
+    if (open) setDraft(filters)
+  }, [open, filters])
 
   if (!open) return null
 

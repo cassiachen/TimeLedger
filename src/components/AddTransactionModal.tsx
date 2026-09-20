@@ -50,6 +50,12 @@ export function AddTransactionModal() {
   const amountNum = parseFloat(amount) || 0
   const hoursPreview = amountToHours(amountNum, hourlyWage)
 
+  function handleTypeChange(next: TransactionType) {
+    setType(next)
+    const list = next === "income" ? incomeCategories : expenseCategories
+    if (!list.some((c) => c.key === category)) setCategory(list[0].key)
+  }
+
   function handleSave() {
     if (!amountNum || amountNum <= 0) return
     const ts = fromDatetimeLocalValue(timestamp)
@@ -109,7 +115,7 @@ export function AddTransactionModal() {
           {TYPE_TABS.map((tab) => (
             <button
               key={tab.key}
-              onClick={() => setType(tab.key)}
+              onClick={() => handleTypeChange(tab.key)}
               className={`h-9 rounded font-label-md text-label-md font-medium transition-colors ${
                 type === tab.key ? 'bg-surface-container-lowest text-on-surface shadow-sm' : 'text-on-surface-variant'
               }`}
@@ -285,7 +291,7 @@ export function AddTransactionModal() {
           )}
           <button
             onClick={handleSave}
-            disabled={!amountNum}
+            disabled={!(amountNum > 0)}
             className="flex-1 h-12 bg-primary text-on-primary rounded font-body-lg text-body-lg font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform disabled:opacity-40"
           >
             <span className="material-symbols-outlined text-[20px]">check_circle</span>

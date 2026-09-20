@@ -14,7 +14,7 @@ export function OnboardingModal() {
   const days = parseFloat(workDays) || 0
   const hours = parseFloat(workHoursPerDay) || 0
   const hourlyWage = getHourlyWage({ monthlyIncome: income, workDays: days, workHoursPerDay: hours })
-  const canSubmit = income > 0 && days > 0 && hours > 0
+  const canSubmit = income > 0 && days > 0 && days <= 31 && hours > 0 && hours <= 24
 
   return (
     <div className="sheet-overlay show">
