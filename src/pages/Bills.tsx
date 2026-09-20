@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { FilterSheet } from '../components/FilterSheet'
 import { TransactionList } from '../components/TransactionList'
-import { formatDayGroupHeader, getCurrentMonthKey, getDayKey, getMonthKey } from '../lib/date'
+import { formatDayGroupHeader, getCurrentMonthKey, getDayKey } from '../lib/date'
+import { buildDayReport, buildMonthReport, groupByDay } from '../lib/earnings'
 import { applyFilters, countActiveFilters, EMPTY_FILTERS, type BillFilters } from '../lib/filters'
 import { amountToHours, formatHM, formatMoney } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 export function Bills() {
-  const { transactions, expenseCategories, incomeCategories, hourlyWage } = useLedger()
+  const { transactions, expenseCategories, incomeCategories, hourlyWage, wageSettings, dayOverrides } = useLedger()
   const [filters, setFilters] = useState<BillFilters>(EMPTY_FILTERS)
   const [filterOpen, setFilterOpen] = useState(false)
   const [sortByCost, setSortByCost] = useState(false)
@@ -19,6 +20,12 @@ export function Bills() {
     )
   }, [transactions, filters, sortByCost])
 
+  const earningsCtx = useMemo(
+    () => ({ settings: wageSettings, overrides: dayOverrides, hourlyWage }),
+    [wageSettings, dayOverrides, hourlyWage]
+  )
+  const allByDay = useMemo(() => groupByDay(transactions), [transactions])
+
   const groups = useMemo(() => {
     const map = new Map<string, typeof filtered>()
     for (const t of filtered) {
@@ -29,20 +36,21 @@ export function Bills() {
     }
     return [...map.entries()]
       .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-      .map(([dayKey, txns]) => {
-        const income = txns.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
-        const expense = txns.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+      .map(([dayKey, txns]) => ({
+        dayKey,
         // txns 已经在 `filtered` 里按当前排序模式排好了，这里保持原样，不要再按时间重排一遍
-        return { dayKey, txns, income, expense }
-      })
-  }, [filtered])
+        txns,
+        // 日汇总永远按当天全部账目 + 当天打工所得计算，不受筛选影响
+        report: buildDayReport(dayKey, allByDay.get(dayKey) || [], earningsCtx),
+      }))
+  }, [filtered, allByDay, earningsCtx])
 
-  const monthTxns = useMemo(
-    () => transactions.filter((t) => getMonthKey(t.timestamp) === getCurrentMonthKey()),
-    [transactions]
-  )
-  const monthExpense = monthTxns.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
-  const monthIncome = monthTxns.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+  const month = useMemo(() => {
+    const now = new Date()
+    return buildMonthReport(now.getFullYear(), now.getMonth(), allByDay, earningsCtx)
+  }, [allByDay, earningsCtx])
+  const monthExpense = month.expense
+  const monthIncome = month.workIncome + month.extraIncome
   const monthExpenseHours = amountToHours(monthExpense, hourlyWage)
   const monthIncomeHours = amountToHours(monthIncome, hourlyWage)
   const netHours = monthIncomeHours - monthExpenseHours
@@ -139,7 +147,7 @@ export function Bills() {
               <span className="font-metric-sm text-metric-sm text-outline">{formatMoney(monthExpense)}</span>
             </div>
             <div className="flex items-baseline gap-1.5 shrink-0">
-              <span className="font-label-md text-label-md text-outline">收入</span>
+              <span className="font-label-md text-label-md text-outline">收入·含打工</span>
               <span className="font-metric-md text-metric-md text-on-surface font-semibold">+{formatHM(monthIncomeHours)}</span>
               <span className="font-metric-sm text-metric-sm text-outline">{formatMoney(monthIncome)}</span>
             </div>
@@ -160,9 +168,9 @@ export function Bills() {
       ) : (
         <div className="flex flex-col gap-space-lg">
           {groups.map((g) => {
-            const net = g.income - g.expense
-            const isSurplus = net >= 0 && g.income > 0
-            const netHoursForDay = amountToHours(Math.abs(net), hourlyWage)
+            const net = g.report.netMoney
+            const isSurplus = net >= 0
+            const netHoursForDay = Math.abs(g.report.netHours)
             const { dateLabel, tag } = formatDayGroupHeader(g.txns[0].timestamp)
             return (
               <div key={g.dayKey} className="flex flex-col gap-2">
@@ -172,7 +180,7 @@ export function Bills() {
                     <span className="font-label-md text-label-md text-outline">{tag}</span>
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-label-md text-label-md text-outline">{isSurplus ? '结余' : '消耗'}</span>
+                    <span className="font-label-md text-label-md text-outline">{isSurplus ? '结余' : '赤字'}</span>
                     <span className={`font-metric-md text-metric-md font-medium ${isSurplus ? 'text-on-surface' : 'text-secondary'}`}>
                       {isSurplus ? '+' : '-'}
                       {formatHM(netHoursForDay)}

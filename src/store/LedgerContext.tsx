@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../lib/categories'
+import type { DayOverrides, DayStatus } from '../lib/earnings'
 import { getItem, setItem } from '../lib/storage'
 import { DEFAULT_WAGE_SETTINGS, generateSeedTransactions } from '../lib/seed'
 import { getHourlyWage } from '../lib/time-value'
@@ -11,6 +12,7 @@ const KEYS = {
   customExpenseCategories: 'tl_custom_expense_categories',
   onboarded: 'tl_onboarded',
   demoCleared: 'tl_demo_cleared',
+  dayOverrides: 'tl_day_overrides',
 }
 
 interface LedgerContextValue {
@@ -33,6 +35,9 @@ interface LedgerContextValue {
   demoCleared: boolean
   clearDemoData: () => void
   resetToDemoData: () => void
+
+  dayOverrides: DayOverrides
+  setDayStatus: (dayKey: string, status: DayStatus | null) => void
 }
 
 const LedgerContext = createContext<LedgerContextValue | null>(null)
@@ -49,6 +54,20 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
   )
   const [onboarded, setOnboarded] = useState<boolean>(() => getItem<boolean>(KEYS.onboarded, false))
   const [demoCleared, setDemoCleared] = useState<boolean>(() => getItem<boolean>(KEYS.demoCleared, false))
+  const [dayOverrides, setDayOverrides] = useState<DayOverrides>(() => getItem<DayOverrides>(KEYS.dayOverrides, {}))
+
+  useEffect(() => {
+    setItem(KEYS.dayOverrides, dayOverrides)
+  }, [dayOverrides])
+
+  function setDayStatus(dayKey: string, status: DayStatus | null) {
+    setDayOverrides((prev) => {
+      const next = { ...prev }
+      if (status) next[dayKey] = status
+      else delete next[dayKey]
+      return next
+    })
+  }
 
   // 首次进入：还没有任何数据时，种一批演示流水，方便原型直接看效果
   useEffect(() => {
@@ -141,6 +160,8 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     demoCleared,
     clearDemoData,
     resetToDemoData,
+    dayOverrides,
+    setDayStatus,
   }
 
   return <LedgerContext.Provider value={value}>{children}</LedgerContext.Provider>

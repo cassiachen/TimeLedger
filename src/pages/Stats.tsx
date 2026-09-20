@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { MonthCalendar } from '../components/MonthCalendar'
 import { getCategoryIcon } from '../lib/categories'
 import { getCurrentMonthKey, getMonthKey } from '../lib/date'
 import {
@@ -124,6 +125,8 @@ export function Stats() {
           </div>
         </div>
       </section>
+
+      <MonthCalendar />
 
       {/* Trend */}
       <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
