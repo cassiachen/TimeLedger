@@ -28,13 +28,27 @@ const INCOME_PRESETS = [6000, 8000, 12000, 20000]
 const HOURS_PRESETS = [7.5, 8.0, 9.0, 10.0]
 const COMMUTE_PRESETS = [0, 0.5, 1, 1.5, 2]
 
+/** 数字输入框保留原始文本，删除到空的时候不会被强行补成 0 */
+function useNumField(initial: number) {
+  const [text, setText] = useState(String(initial))
+  const value = parseFloat(text) || 0
+  const setValue = (v: number | ((prev: number) => number)) =>
+    setText(String(typeof v === "function" ? v(value) : v))
+  return { text, setText, value, setValue }
+}
+
 export function Settings() {
   const { wageSettings, setWageSettings, demoCleared, clearDemoData, resetToDemoData } = useLedger()
   const { askConfirm } = useUI()
-  const [monthlyIncome, setMonthlyIncome] = useState(wageSettings.monthlyIncome)
-  const [workDays, setWorkDays] = useState(wageSettings.workDays)
-  const [workHours, setWorkHours] = useState(wageSettings.workHoursPerDay)
-  const [commuteHours, setCommuteHours] = useState(wageSettings.commuteHours || 0)
+  const incomeField = useNumField(wageSettings.monthlyIncome)
+  const daysField = useNumField(wageSettings.workDays)
+  const hoursField = useNumField(wageSettings.workHoursPerDay)
+  const commuteField = useNumField(wageSettings.commuteHours || 0)
+  const { value: monthlyIncome, setValue: setMonthlyIncome } = incomeField
+  const { value: workDays, setValue: setWorkDays } = daysField
+  const { value: workHours, setValue: setWorkHours } = hoursField
+  const commuteHours = Math.min(6, commuteField.value)
+  const setCommuteHours = commuteField.setValue
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -207,8 +221,8 @@ export function Settings() {
             </div>
             <input
               type="number"
-              value={monthlyIncome}
-              onChange={(e) => setMonthlyIncome(parseFloat(e.target.value) || 0)}
+              value={incomeField.text}
+              onChange={(e) => incomeField.setText(e.target.value)}
               step={100}
               className="w-full h-12 bg-surface-container-low text-on-surface font-metric-lg text-metric-lg rounded px-3.5 pl-8 focus:outline-none focus:bg-surface-container transition-colors"
             />
@@ -244,8 +258,8 @@ export function Settings() {
             <div className="flex-1 h-12 bg-surface-container-low rounded flex items-center justify-center gap-1.5 px-4">
               <input
                 type="number"
-                value={workDays}
-                onChange={(e) => setWorkDays(parseFloat(e.target.value) || 0)}
+                value={daysField.text}
+                onChange={(e) => daysField.setText(e.target.value)}
                 step={0.5}
                 min={1}
                 max={31}
@@ -283,8 +297,8 @@ export function Settings() {
             <div className="flex-1 h-12 bg-surface-container-low rounded flex items-center justify-center gap-1.5 px-4">
               <input
                 type="number"
-                value={workHours}
-                onChange={(e) => setWorkHours(parseFloat(e.target.value) || 0)}
+                value={hoursField.text}
+                onChange={(e) => hoursField.setText(e.target.value)}
                 step={0.5}
                 min={1}
                 max={24}
@@ -324,8 +338,8 @@ export function Settings() {
               <input
                 type="number"
                 inputMode="decimal"
-                value={commuteHours}
-                onChange={(e) => setCommuteHours(Math.max(0, Math.min(6, parseFloat(e.target.value) || 0)))}
+                value={commuteField.text}
+                onChange={(e) => commuteField.setText(e.target.value)}
                 step={0.5}
                 min={0}
                 max={6}
