@@ -67,6 +67,9 @@ export function Home() {
                 {heroM}
                 <span className="font-body-md text-headline-md text-on-primary-container ml-0.5">m</span>
               </span>
+              <span className="font-body-sm text-body-sm text-on-primary-container ml-1">
+                ≈ {(ratio / 100).toFixed(ratio < 100 ? 2 : 1)} 天
+              </span>
             </div>
             <div className="flex items-center gap-1.5 text-on-primary-container">
               <span className="font-body-sm text-body-sm">对应支出</span>
