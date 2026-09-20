@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
 import { buildDayReport } from '../lib/earnings'
-import { filterByDay, getMonthTotals, getTodayTotals } from '../lib/selectors'
+import { filterByDay, getTodayTotals } from '../lib/selectors'
 import { amountToHours, formatHM, formatMoney, getDailyHours } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
@@ -11,14 +11,13 @@ export function Home() {
   const { transactions, hourlyWage, wageSettings, dayOverrides } = useLedger()
 
   const todayTotals = useMemo(() => getTodayTotals(transactions, hourlyWage), [transactions, hourlyWage])
-  const monthTotals = useMemo(() => getMonthTotals(transactions, hourlyWage), [transactions, hourlyWage])
   const todayTxns = useMemo(
     () => filterByDay(transactions, getTodayKey()).sort((a, b) => b.timestamp - a.timestamp),
     [transactions]
   )
 
   const workHoursPerDay = getDailyHours(wageSettings) || 8
-  const ratio = Math.min(100, (todayTotals.expenseHours / workHoursPerDay) * 100)
+  const ratio = (todayTotals.expenseHours / workHoursPerDay) * 100
   const todayReport = buildDayReport(getTodayKey(), todayTxns, {
     settings: wageSettings,
     overrides: dayOverrides,
@@ -26,9 +25,9 @@ export function Home() {
   })
   const incomeTotal = todayReport.workIncome + todayReport.extraIncome
   const incomeHours = amountToHours(incomeTotal, hourlyWage)
-  const netSpend = todayReport.expense - incomeTotal
-  const netSpendHours = amountToHours(Math.abs(netSpend), hourlyWage)
-  const monthWorkDays = monthTotals.expenseHours / workHoursPerDay
+  const expenseTotal = todayReport.expense
+  const net = incomeTotal - expenseTotal
+  const netHours = amountToHours(Math.abs(net), hourlyWage)
   const heroTotalMinutes = Math.round(todayTotals.expenseHours * 60)
   const heroH = Math.floor(heroTotalMinutes / 60)
   const heroM = heroTotalMinutes % 60
@@ -84,7 +83,7 @@ export function Home() {
             <div className="w-full h-2 rounded-full bg-surface-container-highest/20 overflow-hidden p-0.5">
               <div
                 className="h-full rounded-full bg-secondary transition-all duration-500"
-                style={{ width: `${ratio}%` }}
+                style={{ width: `${Math.min(100, ratio)}%` }}
                 title={`今天花掉 ${formatHM(todayTotals.expenseHours)}`}
               />
             </div>
@@ -93,32 +92,23 @@ export function Home() {
           <div className="grid grid-cols-3 gap-2 pt-space-sm border-t border-surface-container-highest/10">
             <div className="flex flex-col">
               <span className="font-label-mono text-label-mono text-on-primary-container">今日收入</span>
-              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">
-                {formatMoney(Math.round(incomeTotal))}
-              </span>
-              <span className="font-label-mono text-label-mono text-on-primary-container/80">
-                {formatHM(incomeHours)}
-              </span>
+              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatMoney(Math.round(incomeTotal))}</span>
+              <span className="font-label-mono text-label-mono text-on-primary-container/80">+{formatHM(incomeHours)}</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">
-                {netSpend >= 0 ? '今日赤字' : '今日结余'}
-              </span>
-              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">
-                {netSpend >= 0 ? '-' : '+'}
-                {formatMoney(Math.abs(netSpend))}
+              <span className="font-label-mono text-label-mono text-on-primary-container">今日支出</span>
+              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatMoney(expenseTotal)}</span>
+              <span className="font-label-mono text-label-mono text-on-primary-container/80">-{formatHM(todayTotals.expenseHours)}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-mono text-label-mono text-on-primary-container">{net >= 0 ? '今日结余' : '今日赤字'}</span>
+              <span className="font-metric-sm text-metric-sm text-secondary-fixed mt-0.5">
+                {net >= 0 ? '+' : '-'}
+                {formatMoney(Math.abs(Math.round(net)))}
               </span>
               <span className="font-label-mono text-label-mono text-secondary-fixed">
-                折合 {formatHM(netSpendHours)}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">本月已花时间</span>
-              <span className="font-metric-sm text-metric-sm text-secondary-fixed mt-0.5">
-                {formatHM(monthTotals.expenseHours)}
-              </span>
-              <span className="font-label-mono text-label-mono text-on-primary-container/80">
-                约 {monthWorkDays.toFixed(1)} 天
+                {net >= 0 ? '+' : '-'}
+                {formatHM(netHours)}
               </span>
             </div>
           </div>

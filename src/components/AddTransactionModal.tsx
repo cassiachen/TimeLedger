@@ -142,6 +142,19 @@ export function AddTransactionModal() {
 
         {type !== 'transfer' ? (
           <>
+            {/* 消费内容 */}
+            <div className="mb-4">
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">
+                {type === 'income' ? '收入内容' : '消费内容'} (可选)
+              </label>
+              <input
+                value={merchant}
+                onChange={(e) => setMerchant(e.target.value)}
+                placeholder={type === 'income' ? '如：兼职、红包' : '如：午餐、地铁、咖啡'}
+                className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none placeholder:text-outline-variant"
+              />
+            </div>
+
             {/* 分类 */}
             <div className="mb-4">
               <label className="font-label-md text-label-md text-on-surface-variant block mb-2">分类</label>
@@ -204,26 +217,15 @@ export function AddTransactionModal() {
               </div>
             </div>
 
-            {/* 商户/备注 */}
-            <div className="mb-4 grid grid-cols-2 gap-2">
-              <div>
-                <label className="font-label-md text-label-md text-on-surface-variant block mb-1">商户 (可选)</label>
-                <input
-                  value={merchant}
-                  onChange={(e) => setMerchant(e.target.value)}
-                  placeholder="如：星巴克"
-                  className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none placeholder:text-outline-variant"
-                />
-              </div>
-              <div>
-                <label className="font-label-md text-label-md text-on-surface-variant block mb-1">备注 (可选)</label>
-                <input
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="..."
-                  className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none placeholder:text-outline-variant"
-                />
-              </div>
+            {/* 备注 */}
+            <div className="mb-4">
+              <label className="font-label-md text-label-md text-on-surface-variant block mb-1">备注 (可选)</label>
+              <input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="..."
+                className="w-full bg-surface-container-low rounded px-3 py-2.5 font-body-sm text-body-sm text-on-surface outline-none placeholder:text-outline-variant"
+              />
             </div>
           </>
         ) : (

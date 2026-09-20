@@ -40,7 +40,7 @@ export function Stats() {
     '自定义': wageSettings.workDays * dailyHours,
   }
   const standardHours = standardHoursByPeriod[period] || 1
-  const exhaustionRatio = Math.min(100, (totals.expenseHours / standardHours) * 100)
+  const exhaustionRatio = (totals.expenseHours / standardHours) * 100
 
   const PERIOD_LABEL: Record<Period, string> = { '周': '本周', '月': '本月', '年': '本年', '自定义': '本期间' }
   const periodLabel = PERIOD_LABEL[period]
@@ -101,8 +101,8 @@ export function Stats() {
 
         <div className="flex flex-col space-y-1.5 pt-1">
           <div className="w-full h-2 rounded bg-surface-container-high overflow-hidden flex">
-            <div className="h-full bg-secondary transition-all duration-700" style={{ width: `${exhaustionRatio}%` }} />
-            <div className="h-full bg-surface-container-highest" style={{ width: `${100 - exhaustionRatio}%` }} />
+            <div className="h-full bg-secondary transition-all duration-700" style={{ width: `${Math.min(100, exhaustionRatio)}%` }} />
+            <div className="h-full bg-surface-container-highest" style={{ width: `${Math.max(0, 100 - exhaustionRatio)}%` }} />
           </div>
           <div className="flex items-center justify-end font-label-mono text-label-mono text-on-surface-variant">
             <span className="flex items-center gap-1">
