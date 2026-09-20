@@ -24,9 +24,9 @@ export function OnboardingModal() {
             <span className="material-symbols-outlined text-secondary text-[26px]">hourglass_bottom</span>
           </div>
         </div>
-        <h3 className="font-headline-md text-headline-md text-on-surface text-center mb-1">先设置你的时间价值</h3>
+        <h3 className="font-headline-md text-headline-md text-on-surface text-center mb-1">先算一下你的时薪</h3>
         <p className="font-body-sm text-body-sm text-on-surface-variant text-center mb-6">
-          用来把每一笔消费换算成工作时间
+          记账时会按它换算成每笔花了多久的班
         </p>
 
         <div className="mb-4">
@@ -54,7 +54,7 @@ export function OnboardingModal() {
             />
           </div>
           <div>
-            <label className="font-label-md text-label-md text-on-surface-variant block mb-1">每天工作小时数</label>
+            <label className="font-label-md text-label-md text-on-surface-variant block mb-1">每天工作小时</label>
             <input
               type="number"
               inputMode="decimal"

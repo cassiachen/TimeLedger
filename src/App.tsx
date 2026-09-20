@@ -13,15 +13,15 @@ import { LedgerProvider } from './store/LedgerContext'
 import { UIProvider } from './store/UIContext'
 
 const SUBTITLES: Record<string, string> = {
-  '/': 'Home',
-  '/bills': 'Ledger',
-  '/stats': 'Analytics',
-  '/settings': 'Settings',
+  '/': '首页',
+  '/bills': '账单',
+  '/stats': '统计',
+  '/settings': '设置',
 }
 
 function Shell() {
   const location = useLocation()
-  const subtitle = SUBTITLES[location.pathname] || 'Home'
+  const subtitle = SUBTITLES[location.pathname] || '首页'
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">

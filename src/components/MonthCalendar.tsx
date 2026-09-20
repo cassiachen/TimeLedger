@@ -46,7 +46,7 @@ export function MonthCalendar() {
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span className="font-headline-md text-headline-md text-on-surface tracking-tight">工时日历</span>
-          <span className="font-label-mono text-label-mono text-on-surface-variant">每格 = 当日打工所得 − 消费（小时）</span>
+          <span className="font-label-mono text-label-mono text-on-surface-variant">每格 = 当天赚到的 − 花掉的（小时）</span>
         </div>
         <div className="flex items-center gap-1">
           <button onClick={() => shiftMonth(-1)} className="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" aria-label="上个月">
@@ -76,7 +76,7 @@ export function MonthCalendar() {
           <span className="font-metric-sm text-metric-sm text-secondary font-medium truncate">{formatMoney(Math.round(report.expense))}</span>
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="font-label-md text-label-md text-on-surface-variant">{report.netMoney >= 0 ? '净结余' : '净赤字'}</span>
+          <span className="font-label-md text-label-md text-on-surface-variant">{report.netMoney >= 0 ? '本月结余' : '本月赤字'}</span>
           <span className={`font-metric-sm text-metric-sm font-medium truncate ${report.netMoney >= 0 ? 'text-on-surface' : 'text-secondary'}`}>
             {shortHours(report.netHours)}h
           </span>
@@ -160,7 +160,7 @@ export function MonthCalendar() {
       )}
 
       <p className="font-body-sm text-body-sm text-outline">
-        工作日按 月收入 ÷ 每月工作天数 逐日累计打工所得（默认周一至周五，可在上方手动改某天）。「工资」类入账是同一笔钱到账，不重复计入。
+        打工所得 = 月收入 ÷ 每月工作天数，按工作日逐天累计（默认周一到周五，点某一天可以改）。记成「工资」的收入是同一笔钱，不重复算。
       </p>
     </section>
   )

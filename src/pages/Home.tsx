@@ -40,7 +40,7 @@ export function Home() {
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
           <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
-            CHRONO DIAL · LIVE
+            今天
           </span>
         </div>
         <h2 className="font-headline-md text-headline-md text-on-surface mt-0.5 tracking-tight">
@@ -56,7 +56,7 @@ export function Home() {
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-secondary text-[20px]">timelapse</span>
             <span className="font-label-md text-label-md text-on-primary-container tracking-wider uppercase">
-              今日生命工时扣除
+              今天花掉的工作时间
             </span>
           </div>
 
@@ -70,7 +70,7 @@ export function Home() {
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-on-primary-container">
-              <span className="font-body-sm text-body-sm">等值支出货币</span>
+              <span className="font-body-sm text-body-sm">对应支出</span>
               <span className="font-metric-md text-metric-md font-medium text-on-primary">
                 {formatMoney(todayTotals.expense)}
               </span>
@@ -78,31 +78,21 @@ export function Home() {
           </div>
 
           <div className="flex flex-col gap-1.5 pt-space-xs">
-            <div className="flex justify-between items-center gap-2 font-label-mono text-label-mono text-on-primary-container">
-              <span className="shrink-0 whitespace-nowrap">08:00 开工</span>
-              <span className="text-secondary-fixed text-center">
-                支出工时占工作日 ({workHoursPerDay}h) 之 {ratio.toFixed(1)}%
-              </span>
-              <span className="shrink-0 whitespace-nowrap">24:00 刻度</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-surface-container-highest/20 overflow-hidden flex gap-0.5 p-0.5">
+            <span className="font-label-mono text-label-mono text-secondary-fixed">
+              相当于一个工作日（{workHoursPerDay}h）的 {ratio.toFixed(1)}%
+            </span>
+            <div className="w-full h-2 rounded-full bg-surface-container-highest/20 overflow-hidden p-0.5">
               <div
-                className="h-full rounded-full bg-surface-variant/40"
-                style={{ width: `${Math.max(0, 33.3 - ratio * 0.333)}%` }}
-                title={`法定工作基准 ${workHoursPerDay} 小时`}
+                className="h-full rounded-full bg-secondary transition-all duration-500"
+                style={{ width: `${ratio}%` }}
+                title={`今天花掉 ${formatHM(todayTotals.expenseHours)}`}
               />
-              <div
-                className="h-full rounded-full bg-secondary animate-pulse"
-                style={{ width: `${ratio * 0.333}%` }}
-                title={`今日已消费转化工时 ${formatHM(todayTotals.expenseHours)}`}
-              />
-              <div className="h-full rounded-full bg-transparent flex-1" />
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-space-sm border-t border-surface-container-highest/10">
             <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">今日收入·含打工</span>
+              <span className="font-label-mono text-label-mono text-on-primary-container">今日收入</span>
               <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">
                 {formatMoney(Math.round(incomeTotal))}
               </span>
@@ -112,23 +102,23 @@ export function Home() {
             </div>
             <div className="flex flex-col">
               <span className="font-label-mono text-label-mono text-on-primary-container">
-                {netSpend >= 0 ? '今日净支出' : '今日净结余'}
+                {netSpend >= 0 ? '今日赤字' : '今日结余'}
               </span>
               <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">
                 {netSpend >= 0 ? '-' : '+'}
                 {formatMoney(Math.abs(netSpend))}
               </span>
               <span className="font-label-mono text-label-mono text-secondary-fixed">
-                {formatHM(netSpendHours)} 换算
+                折合 {formatHM(netSpendHours)}
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">本月累计时长</span>
+              <span className="font-label-mono text-label-mono text-on-primary-container">本月已花时间</span>
               <span className="font-metric-sm text-metric-sm text-secondary-fixed mt-0.5">
                 {formatHM(monthTotals.expenseHours)}
               </span>
               <span className="font-label-mono text-label-mono text-on-primary-container/80">
-                约 {monthWorkDays.toFixed(1)} 个工日
+                约 {monthWorkDays.toFixed(1)} 天
               </span>
             </div>
           </div>
@@ -139,7 +129,7 @@ export function Home() {
       <section className="flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <h3 className="font-headline-md text-headline-md text-on-surface">今日账单</h3>
-          <span className="font-label-mono text-label-mono text-on-surface-variant">{todayTxns.length} 笔交易</span>
+          <span className="font-label-mono text-label-mono text-on-surface-variant">{todayTxns.length} 笔</span>
         </div>
         <Link to="/bills" className="p-1 rounded text-outline hover:text-on-surface transition-colors flex items-center justify-center">
           <span className="material-symbols-outlined text-[20px]">filter_list</span>
@@ -150,7 +140,7 @@ export function Home() {
       {todayTxns.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-space-lg text-outline gap-1.5 bg-surface-container-lowest rounded-xl shadow-sm">
           <span className="material-symbols-outlined text-[28px]">hourglass_empty</span>
-          <span className="font-body-sm text-body-sm">今天还没有记录，点击下方 + 记一笔</span>
+          <span className="font-body-sm text-body-sm">今天还没记账，点下面的 + 记一笔</span>
         </div>
       ) : (
         <TransactionList transactions={todayTxns} />
@@ -163,17 +153,13 @@ export function Home() {
         </div>
         <div className="flex flex-col">
           <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            每笔消费都在换算你的人生工时，每一刻选择，皆在重构生命资产。
+            每笔花销都会按你的时薪，换算成要上多久的班才能赚回来。
           </p>
-          <div className="flex items-center gap-1 mt-1.5">
-            <span className="material-symbols-outlined text-outline text-[13px]">verified</span>
-            <span className="font-label-mono text-label-mono text-outline">时账法则：节制即自由</span>
-          </div>
         </div>
       </section>
 
       {wageSettings.monthlyIncome === 0 && (
-        <p className="font-body-sm text-body-sm text-outline text-center">先在「设置」里配置月收入，才能算出时薪</p>
+        <p className="font-body-sm text-body-sm text-outline text-center">先去「设置」填一下月收入，才能算出时薪</p>
       )}
     </div>
   )

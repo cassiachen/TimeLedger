@@ -95,9 +95,9 @@ export function Settings() {
   return (
     <div className="flex flex-col w-full pb-8">
       <div className="flex flex-col mb-space-lg">
-        <h1 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">时薪基准换算</h1>
+        <h1 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">我的时薪</h1>
         <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-          将劳动收入折算为时间标尺，重新审视每一笔消费的真实代价。
+          按你的收入算出一小时值多少钱，记账时就能看到每笔花了多久的班。
         </p>
       </div>
 
@@ -110,12 +110,12 @@ export function Settings() {
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest/10 w-fit mb-4">
           <span className="material-symbols-outlined text-[14px] text-secondary-container">functions</span>
           <span className="font-label-mono text-label-mono text-on-primary-container tracking-wide">
-            [月实发收入] ÷ ([工作天数] × [工时]) = 真实时薪
+            月收入 ÷（每月工作天数 × 每天工时）= 时薪
           </span>
         </div>
 
         <div className="flex flex-col mb-4">
-          <span className="font-label-mono text-label-mono text-on-primary-container uppercase tracking-wider">当前核算时薪</span>
+          <span className="font-label-mono text-label-mono text-on-primary-container uppercase tracking-wider">当前时薪</span>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="font-metric-lg text-headline-md text-secondary-container">¥</span>
             <span className="font-metric-lg text-display-lg-mobile font-semibold tracking-tight text-on-primary">
@@ -124,14 +124,14 @@ export function Settings() {
             <span className="font-body-md text-body-md text-on-primary-container">/ 小时</span>
           </div>
           <div className="flex items-center gap-2 mt-1.5 text-on-primary-container">
-            <span className="font-label-mono text-label-mono">每分钟价值</span>
+            <span className="font-label-mono text-label-mono">每分钟约</span>
             <span className="font-metric-sm text-metric-sm font-medium text-secondary-fixed">≈ ¥{minuteRate.toFixed(2)}</span>
           </div>
         </div>
 
         <div className="pt-3.5 space-y-2 bg-black/20 rounded-lg p-3">
           <div className="font-label-mono text-label-mono text-on-primary-container uppercase tracking-wider mb-2">
-            购买力折算标尺
+            这些东西要工作多久
           </div>
           {benchmarks.map((b) => (
             <div key={b.id} className="flex items-center justify-between gap-2 font-body-sm text-body-sm">
@@ -188,7 +188,7 @@ export function Settings() {
               className="w-full h-9 mt-1 rounded border border-dashed border-on-primary-container/40 text-on-primary-container font-label-md text-label-md flex items-center justify-center gap-1 hover:text-on-primary"
             >
               <span className="material-symbols-outlined text-[16px]">add</span>
-              添加自定义物品
+              添加物品
             </button>
           )}
         </div>
@@ -198,8 +198,8 @@ export function Settings() {
       <div className="space-y-space-md">
         <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <label className="font-headline-md text-body-lg text-on-surface font-medium">月实发收入</label>
-            <span className="font-label-mono text-label-mono text-on-surface-variant">扣除五险一金后</span>
+            <label className="font-headline-md text-body-lg text-on-surface font-medium">月收入</label>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">税后到手</span>
           </div>
           <div className="relative flex items-center mb-3">
             <div className="absolute left-3.5 flex items-center pointer-events-none text-on-surface-variant font-metric-md text-metric-md">
@@ -232,7 +232,7 @@ export function Settings() {
         <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <label className="font-headline-md text-body-lg text-on-surface font-medium">每月工作天数</label>
-            <span className="font-label-mono text-label-mono text-on-surface-variant">扣除双休与节假</span>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">去掉周末和节假日</span>
           </div>
           <div className="flex items-center gap-3 mb-2">
             <button
@@ -261,7 +261,7 @@ export function Settings() {
             </button>
           </div>
           <div className="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm px-1">
-            <span>参考：法定双休约 21.75 天</span>
+            <span>参考：全年平均约 21.75 天</span>
             <button className="text-secondary hover:underline font-metric-sm text-metric-sm" onClick={() => setWorkDays(21.75)}>
               设为21.75
             </button>
@@ -271,7 +271,7 @@ export function Settings() {
         <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <label className="font-headline-md text-body-lg text-on-surface font-medium">每天实际工时</label>
-            <span className="font-label-mono text-label-mono text-on-surface-variant">在岗专注与加班</span>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">含加班</span>
           </div>
           <div className="flex items-center gap-3 mb-3">
             <button
@@ -356,10 +356,10 @@ export function Settings() {
           className="w-full h-12 bg-primary text-on-primary font-headline-md text-body-lg font-medium rounded-lg shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-transform"
         >
           <span className="material-symbols-outlined text-[20px]">check_circle</span>
-          <span>{saved ? '已保存并同步' : '保存并启用时间标尺'}</span>
+          <span>{saved ? '已保存' : '保存'}</span>
         </button>
         <p className="font-label-mono text-label-mono text-center text-on-surface-variant mt-2.5">
-          变更将实时更新账单时间换算率（当前：¥{hourlyRate.toFixed(2)}/h）
+          保存后，所有账单都会按 ¥{hourlyRate.toFixed(2)}/h 重新换算
         </p>
       </div>
 
@@ -388,7 +388,7 @@ export function Settings() {
 
       <div className="flex items-center gap-1 text-on-surface-variant justify-center mt-space-lg">
         <span className="material-symbols-outlined text-[16px]">lock</span>
-        <span className="font-label-mono text-label-mono uppercase tracking-wider">本地存储 · 登录/云同步即将上线</span>
+        <span className="font-label-mono text-label-mono uppercase tracking-wider">数据只存在这台设备上，登录和云同步之后会上线</span>
       </div>
     </div>
   )

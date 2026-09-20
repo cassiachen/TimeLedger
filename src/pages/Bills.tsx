@@ -118,7 +118,7 @@ export function Bills() {
             <span className="material-symbols-outlined text-[14px]" style={{ color: sortByCost ? undefined : '#9b4500' }}>
               swap_vert
             </span>
-            <span>按工时消耗排序</span>
+            <span>按金额排序</span>
           </button>
           {activeFilterCount > 0 && (
             <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-secondary text-on-secondary font-label-mono text-label-mono shrink-0">
@@ -132,10 +132,10 @@ export function Bills() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              <span className="font-label-mono text-label-mono text-outline uppercase tracking-wider">月度时间收支汇总</span>
+              <span className="font-label-mono text-label-mono text-outline uppercase tracking-wider">本月收支（折合工时）</span>
             </div>
             <span className="font-label-mono text-label-mono text-secondary font-medium">
-              {netHours >= 0 ? '净工时结余 +' : '净工时赤字 '}
+              {netHours >= 0 ? '本月结余 +' : '本月赤字 '}
               {netHours < 0 ? '-' : ''}
               {formatHM(Math.abs(netHours))}
             </span>
@@ -147,7 +147,7 @@ export function Bills() {
               <span className="font-metric-sm text-metric-sm text-outline">{formatMoney(monthExpense)}</span>
             </div>
             <div className="flex items-baseline gap-1.5 shrink-0">
-              <span className="font-label-md text-label-md text-outline">收入·含打工</span>
+              <span className="font-label-md text-label-md text-outline">收入（含打工）</span>
               <span className="font-metric-md text-metric-md text-on-surface font-semibold">+{formatHM(monthIncomeHours)}</span>
               <span className="font-metric-sm text-metric-sm text-outline">{formatMoney(monthIncome)}</span>
             </div>
@@ -198,7 +198,7 @@ export function Bills() {
           <div className="flex flex-col items-center justify-center py-space-lg text-outline gap-1.5 opacity-80">
             <span className="material-symbols-outlined text-[20px]">hourglass_empty</span>
             <span className="font-label-mono text-label-mono tracking-widest uppercase">
-              已加载全部 {filtered.length} 笔时间账目
+              共 {filtered.length} 笔
             </span>
           </div>
         </div>
