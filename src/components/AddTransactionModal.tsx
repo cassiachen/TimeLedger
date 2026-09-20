@@ -82,7 +82,6 @@ export function AddTransactionModal() {
     askConfirm('确定要删除这条记录吗？', () => {
       deleteTransaction(id)
       closeAddModal()
-      showToast('✓ 已删除这条记录')
     })
   }
 

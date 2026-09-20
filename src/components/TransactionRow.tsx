@@ -7,7 +7,7 @@ import { useUI } from '../store/UIContext'
 
 export function TransactionRow({ txn }: { txn: Transaction }) {
   const { expenseCategories, incomeCategories, hourlyWage, deleteTransaction } = useLedger()
-  const { openEditModal, showToast, askConfirm } = useUI()
+  const { openEditModal, askConfirm } = useUI()
 
   const isExpense = txn.type === 'expense'
   const isIncome = txn.type === 'income'
@@ -29,7 +29,6 @@ export function TransactionRow({ txn }: { txn: Transaction }) {
     e.stopPropagation()
     askConfirm(`确定要删除「${title}」这条记录吗？`, () => {
       deleteTransaction(txn.id)
-      showToast('✓ 已删除这条记录')
     })
   }
 
