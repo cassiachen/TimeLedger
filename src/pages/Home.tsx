@@ -2,12 +2,13 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
+import { buildDayReport } from '../lib/earnings'
 import { filterByDay, getMonthTotals, getTodayTotals } from '../lib/selectors'
 import { amountToHours, formatHM, formatMoney, getDailyHours } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 export function Home() {
-  const { transactions, hourlyWage, wageSettings } = useLedger()
+  const { transactions, hourlyWage, wageSettings, dayOverrides } = useLedger()
 
   const todayTotals = useMemo(() => getTodayTotals(transactions, hourlyWage), [transactions, hourlyWage])
   const monthTotals = useMemo(() => getMonthTotals(transactions, hourlyWage), [transactions, hourlyWage])
@@ -18,8 +19,14 @@ export function Home() {
 
   const workHoursPerDay = getDailyHours(wageSettings) || 8
   const ratio = Math.min(100, (todayTotals.expenseHours / workHoursPerDay) * 100)
-  const incomeHours = amountToHours(todayTotals.income, hourlyWage)
-  const netSpend = todayTotals.expense - todayTotals.income
+  const todayReport = buildDayReport(getTodayKey(), todayTxns, {
+    settings: wageSettings,
+    overrides: dayOverrides,
+    hourlyWage,
+  })
+  const incomeTotal = todayReport.workIncome + todayReport.extraIncome
+  const incomeHours = amountToHours(incomeTotal, hourlyWage)
+  const netSpend = todayReport.expense - incomeTotal
   const netSpendHours = amountToHours(Math.abs(netSpend), hourlyWage)
   const monthWorkDays = monthTotals.expenseHours / workHoursPerDay
   const heroTotalMinutes = Math.round(todayTotals.expenseHours * 60)
@@ -95,9 +102,9 @@ export function Home() {
 
           <div className="grid grid-cols-3 gap-2 pt-space-sm border-t border-surface-container-highest/10">
             <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">今日记账收入</span>
+              <span className="font-label-mono text-label-mono text-on-primary-container">今日收入·含打工</span>
               <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">
-                {formatMoney(todayTotals.income)}
+                {formatMoney(Math.round(incomeTotal))}
               </span>
               <span className="font-label-mono text-label-mono text-on-primary-container/80">
                 {formatHM(incomeHours)}
