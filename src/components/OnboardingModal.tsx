@@ -26,7 +26,7 @@ export function OnboardingModal() {
         </div>
         <h3 className="font-headline-md text-headline-md text-on-surface text-center mb-1">先算一下你的时薪</h3>
         <p className="font-body-sm text-body-sm text-on-surface-variant text-center mb-6">
-          记账时会按它换算成每笔花了多久的班
+          记账时会按它算出每笔花了多少时间
         </p>
 
         <div className="mb-4">

@@ -45,7 +45,7 @@ export function MonthCalendar() {
     <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="font-headline-md text-headline-md text-on-surface tracking-tight">工时日历</span>
+          <span className="font-headline-md text-headline-md text-on-surface tracking-tight">时间日历</span>
           <span className="font-label-mono text-label-mono text-on-surface-variant">每格 = 当天赚到的 − 花掉的（小时）</span>
         </div>
         <div className="flex items-center gap-1">

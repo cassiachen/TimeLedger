@@ -82,7 +82,7 @@ export function Stats() {
       <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
         <div className="flex flex-col space-y-1">
           <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
-            {periodLabel}花掉的工作时间
+            {periodLabel}花掉的时间
           </span>
           <div className="flex items-baseline space-x-1.5">
             <span className="font-display-lg-mobile text-display-lg-mobile text-on-surface tracking-tight">
@@ -91,7 +91,7 @@ export function Stats() {
             <span className="font-metric-md text-metric-md text-secondary font-medium">小时</span>
           </div>
           <span className="font-body-sm text-body-sm text-on-surface-variant">
-            占{periodLabel}标准工时（
+            占{periodLabel}工作时间（
             <span className="font-metric-sm text-metric-sm text-on-surface font-medium">{standardHours.toFixed(0)}h</span>）的{' '}
             <span className="font-metric-sm text-metric-sm text-secondary font-medium">{exhaustionRatio.toFixed(1)}%</span>
           </span>
@@ -105,7 +105,7 @@ export function Stats() {
           <div className="flex items-center justify-end font-label-mono text-label-mono text-on-surface-variant">
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-surface-variant inline-block" />
-              标准工时里还剩 {Math.max(0, standardHours - totals.expenseHours).toFixed(1)}h
+              还剩 {Math.max(0, standardHours - totals.expenseHours).toFixed(1)}h
             </span>
           </div>
         </div>
@@ -116,11 +116,11 @@ export function Stats() {
             <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{formatMoney(totals.expense)}</span>
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-label-md text-label-md text-on-surface-variant">日均花掉</span>
+            <span className="font-label-md text-label-md text-on-surface-variant">日均花掉时间</span>
             <span className="font-metric-sm text-metric-sm text-secondary font-medium mt-0.5 truncate">{dailyAvgHours.toFixed(1)}h</span>
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-label-md text-label-md text-on-surface-variant">剩余工时占比</span>
+            <span className="font-label-md text-label-md text-on-surface-variant">剩余占比</span>
             <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{Math.max(0, freedomRatio).toFixed(1)}%</span>
           </div>
         </div>
@@ -133,7 +133,7 @@ export function Stats() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-headline-md text-headline-md text-on-surface tracking-tight">每日支出趋势</span>
-            <span className="font-label-mono text-label-mono text-on-surface-variant">近 18 天，折合工时</span>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">近 18 天，折合时间</span>
           </div>
         </div>
         <div style={{ height: 150 }}>
@@ -212,11 +212,11 @@ export function Stats() {
           <span className="font-headline-md text-headline-md tracking-tight">小结</span>
         </div>
         <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
-          {periodLabel}每上 1 小时班，大约有{' '}
+          {periodLabel}每赚 1 小时的钱，大约有{" "}
           <span className="font-metric-sm text-metric-sm text-secondary font-semibold">
             {Math.round((exhaustionRatio / 100) * 60)} 分钟
           </span>{' '}
-          花在了消费上
+          被花掉了
           {categoryStats[0] ? `，其中${categoryStats[0].category}占得最多` : ''}。
         </p>
       </section>

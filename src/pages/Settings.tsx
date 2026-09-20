@@ -97,7 +97,7 @@ export function Settings() {
       <div className="flex flex-col mb-space-lg">
         <h1 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">我的时薪</h1>
         <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-          按你的收入算出一小时值多少钱，记账时就能看到每笔花了多久的班。
+          按你的收入算出一小时值多少钱，记账时就能看到每笔花了多少时间。
         </p>
       </div>
 
@@ -110,7 +110,7 @@ export function Settings() {
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-highest/10 w-fit mb-4">
           <span className="material-symbols-outlined text-[14px] text-secondary-container">functions</span>
           <span className="font-label-mono text-label-mono text-on-primary-container tracking-wide">
-            月收入 ÷（每月工作天数 × 每天工时）= 时薪
+            月收入 ÷（每月工作天数 × 每天工作时长）= 时薪
           </span>
         </div>
 
@@ -131,7 +131,7 @@ export function Settings() {
 
         <div className="pt-3.5 space-y-2 bg-black/20 rounded-lg p-3">
           <div className="font-label-mono text-label-mono text-on-primary-container uppercase tracking-wider mb-2">
-            这些东西要工作多久
+            这些东西要赚多久
           </div>
           {benchmarks.map((b) => (
             <div key={b.id} className="flex items-center justify-between gap-2 font-body-sm text-body-sm">
@@ -270,7 +270,7 @@ export function Settings() {
 
         <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <label className="font-headline-md text-body-lg text-on-surface font-medium">每天实际工时</label>
+            <label className="font-headline-md text-body-lg text-on-surface font-medium">每天工作时长</label>
             <span className="font-label-mono text-label-mono text-on-surface-variant">含加班</span>
           </div>
           <div className="flex items-center gap-3 mb-3">

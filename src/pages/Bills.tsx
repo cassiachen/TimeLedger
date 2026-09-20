@@ -132,7 +132,7 @@ export function Bills() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              <span className="font-label-mono text-label-mono text-outline uppercase tracking-wider">本月收支（折合工时）</span>
+              <span className="font-label-mono text-label-mono text-outline uppercase tracking-wider">本月收支（折合时间）</span>
             </div>
             <span className="font-label-mono text-label-mono text-secondary font-medium">
               {netHours >= 0 ? '本月结余 +' : '本月赤字 '}

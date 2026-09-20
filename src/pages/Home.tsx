@@ -56,7 +56,7 @@ export function Home() {
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-secondary text-[20px]">timelapse</span>
             <span className="font-label-md text-label-md text-on-primary-container tracking-wider uppercase">
-              今天花掉的工作时间
+              今天花掉的时间
             </span>
           </div>
 
@@ -153,7 +153,7 @@ export function Home() {
         </div>
         <div className="flex flex-col">
           <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            每笔花销都会按你的时薪，换算成要上多久的班才能赚回来。
+            每笔消费都会按你的时薪，换算成花了你多长时间。
           </p>
         </div>
       </section>
