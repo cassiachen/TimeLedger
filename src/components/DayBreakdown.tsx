@@ -7,49 +7,52 @@ export function DayBreakdown() {
   const b = getDayBreakdown(wageSettings)
   const free = Math.max(0, b.free)
 
-  const segments = [
+  const parts = [
     { key: 'sleep', label: '睡觉', hours: b.sleep, color: 'bg-primary-container' },
     { key: 'work', label: '工作', hours: b.work, color: 'bg-on-primary-container' },
     { key: 'commute', label: '通勤', hours: b.commute, color: 'bg-primary-fixed-dim' },
     { key: 'meals', label: '吃饭', hours: b.meals, color: 'bg-outline-variant' },
-    { key: 'free', label: '自己的时间', hours: free, color: 'bg-secondary' },
-  ].filter((s) => s.hours > 0)
+  ]
 
   return (
     <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
-      <div className="flex items-start justify-between">
-        <div className="flex flex-col">
-          <span className="font-headline-md text-headline-md text-on-surface tracking-tight">一天的时间</span>
-          <span className="font-label-mono text-label-mono text-on-surface-variant">按工作日 24 小时算</span>
+      <div className="flex flex-col space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
+            一天里属于自己的时间
+          </span>
+          <Link to="/settings" className="font-label-md text-label-md text-secondary hover:underline">
+            调整
+          </Link>
         </div>
-        <Link
-          to="/settings"
-          className="px-2.5 py-1 rounded bg-surface-container text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high"
-        >
-          调整
-        </Link>
+        <div className="flex items-baseline space-x-1.5">
+          <span className="font-display-lg-mobile text-display-lg-mobile text-on-surface tracking-tight">{free.toFixed(1)}</span>
+          <span className="font-metric-md text-metric-md text-secondary font-medium">小时</span>
+        </div>
+        <span className="font-body-sm text-body-sm text-on-surface-variant">
+          占一天 24 小时的{' '}
+          <span className="font-metric-sm text-metric-sm text-secondary font-medium">{((free / 24) * 100).toFixed(1)}%</span>
+          （按工作日算）
+        </span>
       </div>
 
-      <div className="flex items-baseline gap-1.5">
-        <span className="font-display-lg-mobile text-display-lg-mobile text-secondary tracking-tight">{free.toFixed(1)}</span>
-        <span className="font-metric-md text-metric-md text-on-surface-variant font-medium">小时是你自己的</span>
-        <span className="font-body-sm text-body-sm text-outline ml-1">占一天的 {((free / 24) * 100).toFixed(0)}%</span>
+      <div className="flex flex-col space-y-1.5 pt-1">
+        <div className="w-full h-2 rounded bg-surface-container-high overflow-hidden flex">
+          {parts.map((p) => (
+            <div key={p.key} className={`h-full ${p.color}`} style={{ width: `${(p.hours / 24) * 100}%` }} />
+          ))}
+          <div className="h-full bg-secondary" style={{ width: `${(free / 24) * 100}%` }} />
+        </div>
       </div>
 
-      <div className="w-full h-3 rounded overflow-hidden flex gap-px bg-surface-container">
-        {segments.map((s) => (
-          <div key={s.key} className={`h-full ${s.color}`} style={{ width: `${(s.hours / 24) * 100}%` }} />
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-        {segments.map((s) => (
-          <div key={s.key} className="flex items-center justify-between font-body-sm text-body-sm">
-            <span className="flex items-center gap-1.5 text-on-surface-variant">
-              <span className={`w-2 h-2 rounded-sm inline-block ${s.color}`} />
-              {s.label}
+      <div className="grid grid-cols-4 gap-2 pt-2 bg-surface-container-low p-2.5 rounded-lg">
+        {parts.map((p) => (
+          <div key={p.key} className="flex flex-col min-w-0">
+            <span className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full inline-block ${p.color}`} />
+              {p.label}
             </span>
-            <span className="font-metric-sm text-metric-sm text-on-surface">{s.hours.toFixed(1)}h</span>
+            <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{p.hours.toFixed(1)}h</span>
           </div>
         ))}
       </div>
