@@ -1,7 +1,12 @@
 import type { WageSettings } from './types'
 
+/** 每天实际占用的工时 = 在岗工时 + 通勤时间 */
+export function getDailyHours(settings: WageSettings): number {
+  return settings.workHoursPerDay + (settings.commuteHours || 0)
+}
+
 export function getHourlyWage(settings: WageSettings): number {
-  const totalHours = settings.workDays * settings.workHoursPerDay
+  const totalHours = settings.workDays * getDailyHours(settings)
   if (!totalHours) return 0
   return settings.monthlyIncome / totalHours
 }

@@ -5,24 +5,26 @@ import { useUI } from '../store/UIContext'
 
 const INCOME_PRESETS = [6000, 8000, 12000, 20000]
 const HOURS_PRESETS = [7.5, 8.0, 9.0, 10.0]
+const COMMUTE_PRESETS = [0, 0.5, 1, 1.5, 2]
 
 export function Settings() {
-  const { wageSettings, setWageSettings } = useLedger()
+  const { wageSettings, setWageSettings, demoCleared, clearDemoData, resetToDemoData } = useLedger()
   const { askConfirm } = useUI()
   const [monthlyIncome, setMonthlyIncome] = useState(wageSettings.monthlyIncome)
   const [workDays, setWorkDays] = useState(wageSettings.workDays)
   const [workHours, setWorkHours] = useState(wageSettings.workHoursPerDay)
-  const [commute, setCommute] = useState(false)
+  const [commuteHours, setCommuteHours] = useState(wageSettings.commuteHours || 0)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
     setMonthlyIncome(wageSettings.monthlyIncome)
     setWorkDays(wageSettings.workDays)
     setWorkHours(wageSettings.workHoursPerDay)
+    setCommuteHours(wageSettings.commuteHours || 0)
   }, [wageSettings])
 
-  const effectiveHours = workHours + (commute ? 1.5 : 0)
-  const hourlyRate = getHourlyWage({ monthlyIncome, workDays, workHoursPerDay: effectiveHours })
+  const effectiveHours = workHours + commuteHours
+  const hourlyRate = getHourlyWage({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
   const minuteRate = hourlyRate / 60
 
   const coffeeMinutes = hourlyRate ? Math.round((25 / hourlyRate) * 60) : 0
@@ -31,17 +33,17 @@ export function Settings() {
   const phoneDays = effectiveHours ? phoneHours / effectiveHours : 0
 
   function handleSave() {
-    setWageSettings({ monthlyIncome, workDays, workHoursPerDay: effectiveHours })
+    setWageSettings({ monthlyIncome, workDays, workHoursPerDay: workHours, commuteHours })
     setSaved(true)
     setTimeout(() => setSaved(false), 2400)
   }
 
-  function handleResetDemoData() {
-    askConfirm('确定要清空当前数据，并重新生成一份演示流水吗？', () => {
-      localStorage.removeItem('tl_transactions')
-      localStorage.removeItem('tl_seeded')
-      location.reload()
-    }, '清空并重置')
+  function handleDemoData() {
+    if (demoCleared) {
+      askConfirm('将用演示数据替换当前所有账单，确定吗？', resetToDemoData, '重置')
+    } else {
+      askConfirm('将清除所有演示账单，从零开始记账。确定吗？', clearDemoData, '清除并开始')
+    }
   }
 
   return (
@@ -237,20 +239,39 @@ export function Settings() {
           </div>
         </div>
 
-        <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm flex items-center justify-between">
-          <div className="flex items-center gap-3 pr-2">
-            <div className="w-9 h-9 rounded bg-surface-container-low flex items-center justify-center text-on-surface shrink-0">
-              <span className="material-symbols-outlined text-[20px]">commute</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-body-md text-body-md text-on-surface font-medium">计入每日往返通勤</span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant">默认增加 1.5h/天隐性劳动折算</span>
+        <div className="bg-surface-container-lowest rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <label className="font-headline-md text-body-lg text-on-surface font-medium">每日往返通勤</label>
+            <span className="font-label-mono text-label-mono text-on-surface-variant">0 表示不计入</span>
+          </div>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1 h-12 bg-surface-container-low rounded flex items-center justify-center gap-1.5 px-4">
+              <input
+                type="number"
+                inputMode="decimal"
+                value={commuteHours}
+                onChange={(e) => setCommuteHours(Math.max(0, Math.min(6, parseFloat(e.target.value) || 0)))}
+                step={0.5}
+                min={0}
+                max={6}
+                className="bg-transparent text-center font-metric-lg text-metric-lg text-on-surface w-16 focus:outline-none"
+              />
+              <span className="font-body-md text-body-md text-on-surface-variant">小时 / 天</span>
             </div>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" className="sr-only peer" checked={commute} onChange={(e) => setCommute(e.target.checked)} />
-            <div className="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary" />
-          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {COMMUTE_PRESETS.map((val) => (
+              <button
+                key={val}
+                onClick={() => setCommuteHours(val)}
+                className={`py-1.5 rounded font-metric-sm text-metric-sm text-center active:scale-95 transition-all ${
+                  commuteHours === val ? 'bg-primary text-on-primary' : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
+                }`}
+              >
+                {val}h
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -270,12 +291,21 @@ export function Settings() {
       {/* Data management */}
       <div className="mt-space-xl bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden">
         <button
-          onClick={handleResetDemoData}
+          onClick={handleDemoData}
           className="w-full flex items-center justify-between px-4 py-3.5 active:bg-surface-container-low"
         >
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[20px] text-on-surface-variant">restart_alt</span>
-            <span className="font-body-md text-body-md text-on-surface">重置为演示数据</span>
+            <span className="material-symbols-outlined text-[20px] text-on-surface-variant">
+              {demoCleared ? 'restart_alt' : 'edit_note'}
+            </span>
+            <div className="flex flex-col items-start">
+              <span className="font-body-md text-body-md text-on-surface">
+                {demoCleared ? '重置为演示数据' : '开始我的记账'}
+              </span>
+              {!demoCleared && (
+                <span className="font-body-sm text-body-sm text-on-surface-variant">清除所有演示数据</span>
+              )}
+            </div>
           </div>
           <span className="material-symbols-outlined text-[18px] text-outline/50">chevron_right</span>
         </button>

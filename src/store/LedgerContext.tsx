@@ -10,6 +10,7 @@ const KEYS = {
   wageSettings: 'tl_wage_settings',
   customExpenseCategories: 'tl_custom_expense_categories',
   onboarded: 'tl_onboarded',
+  demoCleared: 'tl_demo_cleared',
 }
 
 interface LedgerContextValue {
@@ -28,6 +29,10 @@ interface LedgerContextValue {
 
   onboarded: boolean
   completeOnboarding: (s: WageSettings) => void
+
+  demoCleared: boolean
+  clearDemoData: () => void
+  resetToDemoData: () => void
 }
 
 const LedgerContext = createContext<LedgerContextValue | null>(null)
@@ -43,6 +48,7 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     getItem<Category[]>(KEYS.customExpenseCategories, [])
   )
   const [onboarded, setOnboarded] = useState<boolean>(() => getItem<boolean>(KEYS.onboarded, false))
+  const [demoCleared, setDemoCleared] = useState<boolean>(() => getItem<boolean>(KEYS.demoCleared, false))
 
   // 首次进入：还没有任何数据时，种一批演示流水，方便原型直接看效果
   useEffect(() => {
@@ -107,6 +113,18 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     setItem(KEYS.onboarded, true)
   }
 
+  function clearDemoData() {
+    setTransactions([])
+    setDemoCleared(true)
+    setItem(KEYS.demoCleared, true)
+  }
+
+  function resetToDemoData() {
+    setTransactions(generateSeedTransactions())
+    setDemoCleared(false)
+    setItem(KEYS.demoCleared, false)
+  }
+
   const value: LedgerContextValue = {
     transactions,
     addTransaction,
@@ -120,6 +138,9 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     addCustomExpenseCategory,
     onboarded,
     completeOnboarding,
+    demoCleared,
+    clearDemoData,
+    resetToDemoData,
   }
 
   return <LedgerContext.Provider value={value}>{children}</LedgerContext.Provider>

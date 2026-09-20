@@ -16,6 +16,7 @@ export interface WageSettings {
   monthlyIncome: number
   workDays: number
   workHoursPerDay: number
+  commuteHours?: number
 }
 
 export interface Category {

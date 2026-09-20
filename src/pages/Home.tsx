@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
 import { filterByDay, getMonthTotals, getTodayTotals } from '../lib/selectors'
-import { amountToHours, formatHM, formatMoney } from '../lib/time-value'
+import { amountToHours, formatHM, formatMoney, getDailyHours } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 export function Home() {
@@ -16,7 +16,7 @@ export function Home() {
     [transactions]
   )
 
-  const workHoursPerDay = wageSettings.workHoursPerDay || 8
+  const workHoursPerDay = getDailyHours(wageSettings) || 8
   const ratio = Math.min(100, (todayTotals.expenseHours / workHoursPerDay) * 100)
   const incomeHours = amountToHours(todayTotals.income, hourlyWage)
   const netSpend = todayTotals.expense - todayTotals.income

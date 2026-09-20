@@ -10,7 +10,7 @@ import {
   getYearTotals,
   type PeriodTotals,
 } from '../lib/selectors'
-import { formatHM, formatMoney } from '../lib/time-value'
+import { formatHM, formatMoney, getDailyHours } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 type Period = '周' | '月' | '年' | '自定义'
@@ -31,11 +31,12 @@ export function Stats() {
   }
   const totals = totalsByPeriod[period]
 
+  const dailyHours = getDailyHours(wageSettings)
   const standardHoursByPeriod: Record<Period, number> = {
-    '周': wageSettings.workHoursPerDay * 7,
-    '月': wageSettings.workDays * wageSettings.workHoursPerDay,
-    '年': wageSettings.workDays * wageSettings.workHoursPerDay * 12,
-    '自定义': wageSettings.workDays * wageSettings.workHoursPerDay,
+    '周': dailyHours * 7,
+    '月': wageSettings.workDays * dailyHours,
+    '年': wageSettings.workDays * dailyHours * 12,
+    '自定义': wageSettings.workDays * dailyHours,
   }
   const standardHours = standardHoursByPeriod[period] || 1
   const exhaustionRatio = Math.min(100, (totals.expenseHours / standardHours) * 100)
