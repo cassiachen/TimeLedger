@@ -8,7 +8,7 @@ import { amountToHours, formatHM, formatMoney, getDailyHours, getDayBreakdown } 
 import { useLedger } from '../store/LedgerContext'
 
 export function Home() {
-  const { transactions, hourlyWage, wageSettings, dayOverrides } = useLedger()
+  const { transactions, hourlyWage, wageSettings, dayOverrides, now } = useLedger()
 
   const todayTotals = useMemo(() => getTodayTotals(transactions, hourlyWage), [transactions, hourlyWage])
   const todayTxns = useMemo(
@@ -22,6 +22,7 @@ export function Home() {
     settings: wageSettings,
     overrides: dayOverrides,
     hourlyWage,
+    now,
   })
   const incomeTotal = todayReport.workIncome + todayReport.extraIncome
   const incomeHours = amountToHours(incomeTotal, hourlyWage)

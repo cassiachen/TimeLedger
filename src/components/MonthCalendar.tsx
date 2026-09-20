@@ -13,15 +13,15 @@ function shortHours(h: number): string {
 }
 
 export function MonthCalendar() {
-  const { transactions, wageSettings, dayOverrides, hourlyWage, setDayStatus } = useLedger()
+  const { transactions, wageSettings, dayOverrides, hourlyWage, setDayStatus, now } = useLedger()
   const today = new Date()
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() })
   const [selected, setSelected] = useState<string>(getTodayKey())
 
   const byDay = useMemo(() => groupByDay(transactions), [transactions])
   const report = useMemo(
-    () => buildMonthReport(view.y, view.m, byDay, { settings: wageSettings, overrides: dayOverrides, hourlyWage }),
-    [view, byDay, wageSettings, dayOverrides, hourlyWage]
+    () => buildMonthReport(view.y, view.m, byDay, { settings: wageSettings, overrides: dayOverrides, hourlyWage, now }),
+    [view, byDay, wageSettings, dayOverrides, hourlyWage, now]
   )
 
   const todayKey = getTodayKey()

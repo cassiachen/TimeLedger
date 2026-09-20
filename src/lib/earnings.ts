@@ -1,5 +1,5 @@
 import { getDayKey, getTodayKey } from './date'
-import { amountToHours } from './time-value'
+import { amountToHours, DEFAULT_WORK_START_HOUR } from './time-value'
 import type { Transaction, WageSettings } from './types'
 
 export type DayStatus = 'work' | 'off'
@@ -12,6 +12,17 @@ export interface EarningsCtx {
   settings: WageSettings
   overrides: DayOverrides
   hourlyWage: number
+  /** 当前时间（毫秒），用来算今天已经赚到多少；不传就用系统时间 */
+  now?: number
+}
+
+/** 今天已经过去了上班时间窗口的几分之几（0~1）：从上班时间开始，到上班时间 + 工作时长结束 */
+export function workFraction(now: number, settings: WageSettings): number {
+  const start = settings.workStartHour ?? DEFAULT_WORK_START_HOUR
+  const span = settings.workHoursPerDay || 8
+  const d = new Date(now)
+  const hour = d.getHours() + d.getMinutes() / 60
+  return Math.min(1, Math.max(0, (hour - start) / span))
 }
 
 export interface DayReport {
@@ -62,7 +73,12 @@ export function buildDayReport(dayKey: string, dayTxns: Transaction[], ctx: Earn
   const { settings, overrides, hourlyWage } = ctx
   const work = isWorkday(dayKey, overrides)
   const isFuture = dayKey > getTodayKey()
-  const workIncome = !isFuture && work && settings.workDays > 0 ? settings.monthlyIncome / settings.workDays : 0
+  let workIncome = 0
+  if (!isFuture && work && settings.workDays > 0) {
+    const daily = settings.monthlyIncome / settings.workDays
+    // 过去的工作日算满一天；今天按上班时间随时间慢慢累计
+    workIncome = dayKey === getTodayKey() ? daily * workFraction(ctx.now ?? Date.now(), settings) : daily
+  }
 
   let extraIncome = 0
   let expense = 0

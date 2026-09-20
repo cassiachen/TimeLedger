@@ -36,6 +36,7 @@ interface LedgerContextValue {
   clearDemoData: () => void
   resetToDemoData: () => void
 
+  now: number
   dayOverrides: DayOverrides
   setDayStatus: (dayKey: string, status: DayStatus | null) => void
 }
@@ -54,6 +55,16 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
   )
   const [onboarded, setOnboarded] = useState<boolean>(() => getItem<boolean>(KEYS.onboarded, false))
   const [demoCleared, setDemoCleared] = useState<boolean>(() => getItem<boolean>(KEYS.demoCleared, false))
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const tick = () => setNow(Date.now())
+    const timer = setInterval(tick, 30_000)
+    document.addEventListener('visibilitychange', tick)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', tick)
+    }
+  }, [])
   const [dayOverrides, setDayOverrides] = useState<DayOverrides>(() => getItem<DayOverrides>(KEYS.dayOverrides, {}))
 
   useEffect(() => {
@@ -184,6 +195,7 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     demoCleared,
     clearDemoData,
     resetToDemoData,
+    now,
     dayOverrides,
     setDayStatus,
   }

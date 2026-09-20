@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getItem, setItem } from '../lib/storage'
-import { DEFAULT_MEAL_HOURS, DEFAULT_SLEEP_HOURS, getHourlyWage } from '../lib/time-value'
+import { DEFAULT_MEAL_HOURS, DEFAULT_SLEEP_HOURS, DEFAULT_WORK_START_HOUR, getHourlyWage } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 import { useUI } from '../store/UIContext'
 
@@ -28,6 +28,16 @@ const INCOME_PRESETS = [6000, 8000, 12000, 20000]
 const HOURS_PRESETS = [7.5, 8.0, 9.0, 10.0]
 const COMMUTE_PRESETS = [0, 0.5, 1, 1.5, 2]
 
+function hourToTime(h: number): string {
+  const total = Math.round(h * 60)
+  return `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
+function timeToHour(t: string): number {
+  const [h, m] = t.split(':').map(Number)
+  return (h || 0) + (m || 0) / 60
+}
+
 /** 数字输入框保留原始文本，删除到空的时候不会被强行补成 0 */
 function useNumField(initial: number) {
   const [text, setText] = useState(String(initial))
@@ -51,6 +61,7 @@ export function Settings() {
   const { value: workHours, setValue: setWorkHours } = hoursField
   const commuteHours = Math.min(6, commuteField.value)
   const setCommuteHours = commuteField.setValue
+  const [startTime, setStartTime] = useState(hourToTime(wageSettings.workStartHour ?? DEFAULT_WORK_START_HOUR))
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -60,6 +71,7 @@ export function Settings() {
     setCommuteHours(wageSettings.commuteHours || 0)
     sleepField.setValue(wageSettings.sleepHours ?? DEFAULT_SLEEP_HOURS)
     mealField.setValue(wageSettings.mealHours ?? DEFAULT_MEAL_HOURS)
+    setStartTime(hourToTime(wageSettings.workStartHour ?? DEFAULT_WORK_START_HOUR))
   }, [wageSettings])
 
   const effectiveHours = workHours + commuteHours
@@ -68,6 +80,9 @@ export function Settings() {
   if (commuteTooLong) errors.push('每日往返通勤最多填 6 小时')
   if (workDays > 31) errors.push('每月工作天数不能超过 31 天')
   if (workHours > 24 || effectiveHours > 24) errors.push('每天工作时长加通勤不能超过 24 小时')
+  const startHour = timeToHour(startTime)
+  const endTime = hourToTime(startHour + workHours)
+  if (startHour + workHours > 24) errors.push('上班时间加工作时长不能超过午夜 24 点')
   const freeHours = 24 - sleepField.value - mealField.value - effectiveHours
   if (sleepField.value > 24 || mealField.value > 24 || freeHours < 0) errors.push('睡觉、吃饭、工作和通勤加起来不能超过 24 小时')
   const inputsValid = monthlyIncome > 0 && workDays > 0 && workHours > 0 && errors.length === 0
@@ -112,6 +127,7 @@ export function Settings() {
       commuteHours,
       sleepHours: sleepField.value,
       mealHours: mealField.value,
+      workStartHour: startHour,
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 2400)
@@ -389,6 +405,20 @@ export function Settings() {
             <label className="font-headline-md text-body-lg text-on-surface font-medium">每天的时间分配</label>
             <span className="font-label-mono text-label-mono text-on-surface-variant">按工作日算</span>
           </div>
+          <div className="mb-3">
+            <span className="font-label-md text-label-md text-on-surface-variant block mb-1">上班时间</span>
+            <div className="h-12 bg-surface-container-low rounded flex items-center justify-between px-3">
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => e.target.value && setStartTime(e.target.value)}
+                className="bg-transparent font-metric-lg text-metric-lg text-on-surface focus:outline-none"
+              />
+              <span className="font-body-sm text-body-sm text-on-surface-variant">
+                {startHour + workHours <= 24 ? `下班约 ${endTime}` : '超过午夜了'}
+              </span>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
             {[
               { label: '睡觉', field: sleepField },
@@ -405,9 +435,9 @@ export function Settings() {
                     step={0.5}
                     min={0}
                     max={24}
-                    className="bg-transparent text-center font-metric-lg text-metric-lg text-on-surface w-14 focus:outline-none"
+                    className="bg-transparent text-center font-metric-lg text-metric-lg text-on-surface w-full min-w-0 focus:outline-none"
                   />
-                  <span className="font-body-sm text-body-sm text-on-surface-variant">小时</span>
+                  <span className="font-body-sm text-body-sm text-on-surface-variant shrink-0">小时</span>
                 </div>
               </div>
             ))}

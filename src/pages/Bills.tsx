@@ -8,7 +8,7 @@ import { amountToHours, formatHM, formatMoney } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 export function Bills() {
-  const { transactions, expenseCategories, incomeCategories, hourlyWage, wageSettings, dayOverrides } = useLedger()
+  const { transactions, expenseCategories, incomeCategories, hourlyWage, wageSettings, dayOverrides, now } = useLedger()
   const [filters, setFilters] = useState<BillFilters>(EMPTY_FILTERS)
   const [filterOpen, setFilterOpen] = useState(false)
   const [sortByCost, setSortByCost] = useState(false)
@@ -21,8 +21,8 @@ export function Bills() {
   }, [transactions, filters, sortByCost])
 
   const earningsCtx = useMemo(
-    () => ({ settings: wageSettings, overrides: dayOverrides, hourlyWage }),
-    [wageSettings, dayOverrides, hourlyWage]
+    () => ({ settings: wageSettings, overrides: dayOverrides, hourlyWage, now }),
+    [wageSettings, dayOverrides, hourlyWage, now]
   )
   const allByDay = useMemo(() => groupByDay(transactions), [transactions])
 

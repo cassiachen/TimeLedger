@@ -19,6 +19,7 @@ export interface WageSettings {
   commuteHours?: number
   sleepHours?: number
   mealHours?: number
+  workStartHour?: number
 }
 
 export interface Category {

@@ -5,6 +5,7 @@ export function getDailyHours(settings: WageSettings): number {
   return settings.workHoursPerDay + (settings.commuteHours || 0)
 }
 
+export const DEFAULT_WORK_START_HOUR = 9
 export const DEFAULT_SLEEP_HOURS = 7
 export const DEFAULT_MEAL_HOURS = 2
 

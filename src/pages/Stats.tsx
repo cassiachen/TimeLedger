@@ -15,7 +15,7 @@ import {
 import { formatHM, formatMoney, getDailyHours } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
-type Period = '周' | '月' | '年' | '自定义'
+type Period = '周' | '月' | '年'
 
 export function Stats() {
   const { transactions, hourlyWage, expenseCategories, wageSettings } = useLedger()
@@ -29,7 +29,6 @@ export function Stats() {
     '周': weekTotals,
     '月': monthTotals,
     '年': yearTotals,
-    '自定义': monthTotals,
   }
   const totals = totalsByPeriod[period]
 
@@ -38,12 +37,11 @@ export function Stats() {
     '周': dailyHours * 7,
     '月': wageSettings.workDays * dailyHours,
     '年': wageSettings.workDays * dailyHours * 12,
-    '自定义': wageSettings.workDays * dailyHours,
   }
   const standardHours = standardHoursByPeriod[period] || 1
   const exhaustionRatio = (totals.expenseHours / standardHours) * 100
 
-  const PERIOD_LABEL: Record<Period, string> = { '周': '本周', '月': '本月', '年': '本年', '自定义': '本期间' }
+  const PERIOD_LABEL: Record<Period, string> = { '周': '本周', '月': '本月', '年': '本年' }
   const periodLabel = PERIOD_LABEL[period]
 
   const categoryStats = useMemo(() => {
@@ -64,8 +62,8 @@ export function Stats() {
     <div className="flex flex-col w-full space-y-space-lg">
       {/* Period switch */}
       <section className="flex items-center justify-between bg-surface-container-low p-1 rounded-xl">
-        <div className="grid grid-cols-4 w-full gap-1">
-          {(['周', '月', '年', '自定义'] as Period[]).map((p) => (
+        <div className="grid grid-cols-3 w-full gap-1">
+          {(['周', '月', '年'] as Period[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
