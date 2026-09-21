@@ -227,13 +227,20 @@ export function TimeLedger() {
           </span>
         </div>
         <div className="flex flex-col gap-3">
-          <span className="font-label-mono text-label-mono text-on-surface-variant">我安排的</span>
+          <span className="font-label-mono text-label-mono text-on-surface-variant">我安排的（来自你的记录）</span>
           {monthRows.arranged.map((r) => renderRow(r, true))}
         </div>
-        <div className="flex flex-col gap-3 pt-1">
-          <span className="font-label-mono text-label-mono text-on-surface-variant">工作与生存（按设置估算）</span>
-          {monthRows.fixed.map((r) => renderRow(r, false))}
+      </section>
+
+      {/* 估算的部分单独放，避免和实际记录混在一起比较 */}
+      <section className="rounded-xl bg-surface-container-low p-space-lg flex flex-col gap-space-md">
+        <div className="flex flex-col">
+          <span className="font-headline-md text-headline-md text-on-surface">工作与生存</span>
+          <span className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            这部分是按「设置」里的时长估算的，不是实际记录。
+          </span>
         </div>
+        <div className="flex flex-col gap-3">{monthRows.fixed.map((r) => renderRow(r, false))}</div>
       </section>
     </div>
   )

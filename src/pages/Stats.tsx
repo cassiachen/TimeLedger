@@ -58,7 +58,6 @@ export function Stats() {
   const dailyAvgHours = totals.expenseHours / dayCount
   const freedomRatio = 100 - exhaustionRatio
   const rent = categoryStats.find((c) => c.category === '居住')
-  const topCategory = categoryStats[0]
   const spentDays = dailyHours > 0 ? totals.expenseHours / dailyHours : 0
 
   return (
@@ -230,13 +229,15 @@ export function Stats() {
             ，只为了支付房租。
           </p>
         )}
-        {topCategory && topCategory.category !== '居住' && (
+        {categoryStats.length > 0 && (
           <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
-            本月最大的时间支出是：{topCategory.category}｜{formatDuration(topCategory.hours)}。
+            本月的工作时间，主要换来了：
+            {categoryStats
+              .slice(0, 3)
+              .map((c) => `${c.category} ${formatHM(c.hours)}`)
+              .join('、')}
+            。
           </p>
-        )}
-        {rent && topCategory?.category === '居住' && (
-          <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">房租是你本月最大的时间支出。</p>
         )}
       </section>
     </div>
