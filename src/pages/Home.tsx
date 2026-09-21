@@ -4,12 +4,22 @@ import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
 import { buildDayReport } from '../lib/earnings'
 import { filterByDay, getTodayTotals } from '../lib/selectors'
-import { amountToHours, formatHM, formatMoney, getDailyHours, getDayBreakdown } from '../lib/time-value'
+import { amountToHours, formatDuration, formatHM, formatMoney, getDailyHours, getDayBreakdown } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 function settingsDaily(s: { monthlyIncome: number; workDays: number }) {
   return s.workDays > 0 ? s.monthlyIncome / s.workDays : 0
 }
+
+// 底部小卡片：每天换一句，按日期轮流
+const SLOGANS = [
+  '你花掉的每一块钱，背后都是一段工作时间。',
+  '钱花掉了，时间也花掉了。',
+  '你买下的每一样东西，都有它的时间价格。',
+  '今天花掉的钱，是昨天换来的时间。',
+  '看看钱的另一种单位：时间。',
+  '别只看价格，看看它需要你工作多久。',
+]
 
 export function Home() {
   const { transactions, hourlyWage, wageSettings, dayOverrides } = useLedger()
@@ -47,6 +57,7 @@ export function Home() {
   const heroTotalMinutes = Math.round(todayTotals.expenseHours * 60)
   const heroH = Math.floor(heroTotalMinutes / 60)
   const heroM = heroTotalMinutes % 60
+  const slogan = SLOGANS[Math.floor(now / 86400000) % SLOGANS.length]
 
   return (
     <div className="flex flex-col w-full gap-space-lg">
@@ -148,6 +159,14 @@ export function Home() {
         </Link>
       </section>
 
+      {todayTxns.length > 0 && todayTotals.expenseHours > 0 && (
+        <p className="font-body-sm text-body-sm text-on-surface-variant -mt-space-sm">
+          今天，你用{' '}
+          <span className="font-metric-sm text-metric-sm text-secondary font-medium">{formatDuration(todayTotals.expenseHours)}</span>{' '}
+          的工作时间，换来了这些东西。
+        </p>
+      )}
+
       {/* Ledger Transaction List */}
       {todayTxns.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-space-lg text-outline gap-1.5 bg-surface-container-lowest rounded-xl shadow-sm">
@@ -165,7 +184,7 @@ export function Home() {
         </div>
         <div className="flex flex-col">
           <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
-            每笔消费都会按你的时薪，换算成花了你多长时间。
+            {slogan}
           </p>
         </div>
       </section>

@@ -12,7 +12,7 @@ import {
   getYearTotals,
   type PeriodTotals,
 } from '../lib/selectors'
-import { formatHM, formatMoney, getDailyHours } from '../lib/time-value'
+import { formatDuration, formatHM, formatMoney, getDailyHours } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 type Period = '周' | '月' | '年'
@@ -57,6 +57,9 @@ export function Stats() {
   const dayCount = period === '周' ? 7 : period === '年' ? dayOfYear : now.getDate()
   const dailyAvgHours = totals.expenseHours / dayCount
   const freedomRatio = 100 - exhaustionRatio
+  const rent = categoryStats.find((c) => c.category === '居住')
+  const topCategory = categoryStats[0]
+  const spentDays = dailyHours > 0 ? totals.expenseHours / dailyHours : 0
 
   return (
     <div className="flex flex-col w-full space-y-space-lg">
@@ -215,13 +218,26 @@ export function Stats() {
           <span className="font-headline-md text-headline-md tracking-tight">小结</span>
         </div>
         <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
-          {periodLabel}每赚 1 小时的钱，大约有{" "}
-          <span className="font-metric-sm text-metric-sm text-secondary font-semibold">
-            {Math.round((exhaustionRatio / 100) * 60)} 分钟
-          </span>{' '}
-          被花掉了
-          {categoryStats[0] ? `，其中${categoryStats[0].category}占得最多` : ''}。
+          {periodLabel}，你已经用{' '}
+          <span className="font-metric-sm text-metric-sm text-secondary font-semibold">{formatDuration(totals.expenseHours)}</span>{' '}
+          的工作时间换来了消费，相当于{' '}
+          <span className="font-metric-sm text-metric-sm text-secondary font-semibold">{spentDays.toFixed(1)} 个工作日</span>。
         </p>
+        {rent && (
+          <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
+            本月已经工作{' '}
+            <span className="font-metric-sm text-metric-sm text-secondary font-semibold">{formatDuration(rent.hours)}</span>
+            ，只为了支付房租。
+          </p>
+        )}
+        {topCategory && topCategory.category !== '居住' && (
+          <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
+            本月最大的时间支出是：{topCategory.category}｜{formatDuration(topCategory.hours)}。
+          </p>
+        )}
+        {rent && topCategory?.category === '居住' && (
+          <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">房租是你本月最大的时间支出。</p>
+        )}
       </section>
     </div>
   )
