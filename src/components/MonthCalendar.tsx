@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { buildMonthReport, defaultIsWorkday, groupByDay, parseDayKey } from '../lib/earnings'
+import { useEffect, useMemo, useState } from 'react'
+import { buildMonthReport, defaultIsWorkday, groupByDay, parseDayKey, workFraction } from '../lib/earnings'
 import { getTodayKey } from '../lib/date'
 import { formatHM, formatMoney } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
@@ -13,7 +13,13 @@ function shortHours(h: number): string {
 }
 
 export function MonthCalendar() {
-  const { transactions, wageSettings, dayOverrides, hourlyWage, setDayStatus, now } = useLedger()
+  const { transactions, wageSettings, dayOverrides, hourlyWage, setDayStatus } = useLedger()
+  // 每秒走一次，今天的打工收入跟着时间一点点涨
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
   const today = new Date()
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() })
   const [selected, setSelected] = useState<string>(getTodayKey())
@@ -28,6 +34,9 @@ export function MonthCalendar() {
   const isCurrentMonth = view.y === today.getFullYear() && view.m === today.getMonth()
   const leading = new Date(view.y, view.m, 1).getDay()
   const selectedReport = report.days.find((d) => d.dayKey === selected)
+  const frac = workFraction(now, wageSettings)
+  const todayAccruing = !!report.days.find((d) => d.dayKey === todayKey)?.isWorkday && frac > 0 && frac < 1
+  const fmtWork = (v: number, live: boolean) => (live ? `¥${v.toFixed(2)}` : formatMoney(Math.round(v)))
 
   function shiftMonth(delta: number) {
     const d = new Date(view.y, view.m + delta, 1)
@@ -69,7 +78,7 @@ export function MonthCalendar() {
       <div className="grid grid-cols-3 gap-2 bg-surface-container-low p-2.5 rounded-lg">
         <div className="flex flex-col min-w-0">
           <span className="font-label-md text-label-md text-on-surface-variant">打工收入</span>
-          <span className="font-metric-sm text-metric-sm text-on-surface font-medium truncate">{formatMoney(Math.round(report.workIncome))}</span>
+          <span className="font-metric-sm text-metric-sm text-on-surface font-medium truncate">{fmtWork(report.workIncome, isCurrentMonth && todayAccruing)}</span>
         </div>
         <div className="flex flex-col min-w-0">
           <span className="font-label-md text-label-md text-on-surface-variant">消费</span>
@@ -135,7 +144,7 @@ export function MonthCalendar() {
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-metric-sm text-metric-sm">
             <span className="text-on-surface-variant">
-              打工所得 <span className="text-on-surface">{selectedReport.isFuture ? '—' : `+${formatMoney(Math.round(selectedReport.workIncome))}`}</span>
+              打工所得 <span className="text-on-surface">{selectedReport.isFuture ? '—' : `+${fmtWork(selectedReport.workIncome, selectedReport.dayKey === todayKey && todayAccruing)}`}</span>
             </span>
             <span className="text-on-surface-variant">
               其他收入 <span className="text-on-surface">+{formatMoney(selectedReport.extraIncome)}</span>
