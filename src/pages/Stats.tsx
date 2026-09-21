@@ -56,7 +56,9 @@ export function Stats() {
   const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000)
   const dayCount = period === '周' ? 7 : period === '年' ? dayOfYear : now.getDate()
   const dailyAvgHours = totals.expenseHours / dayCount
+  const freedomRatio = 100 - exhaustionRatio
   const rent = categoryStats.find((c) => c.category === '居住')
+  const spentDays = dailyHours > 0 ? totals.expenseHours / dailyHours : 0
 
   return (
     <div className="flex flex-col w-full space-y-space-lg">
@@ -111,7 +113,7 @@ export function Stats() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 pt-2 bg-surface-container-low p-2.5 rounded-lg">
+        <div className="grid grid-cols-3 gap-2 pt-2 bg-surface-container-low p-2.5 rounded-lg">
           <div className="flex flex-col min-w-0">
             <span className="font-label-md text-label-md text-on-surface-variant">支出合计</span>
             <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{formatMoney(totals.expense)}</span>
@@ -119,6 +121,10 @@ export function Stats() {
           <div className="flex flex-col min-w-0">
             <span className="font-label-md text-label-md text-on-surface-variant">日均花掉时间</span>
             <span className="font-metric-sm text-metric-sm text-secondary font-medium mt-0.5 truncate">{dailyAvgHours.toFixed(1)}h</span>
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-label-md text-label-md text-on-surface-variant">剩余占比</span>
+            <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{Math.max(0, freedomRatio).toFixed(1)}%</span>
           </div>
         </div>
       </section>
@@ -204,20 +210,36 @@ export function Stats() {
         )}
       </section>
 
-      {/* 固定支出：房租占了多少工作时间 */}
-      {rent && (
-        <section className="flex flex-col bg-secondary-fixed text-on-secondary-fixed rounded-xl p-space-lg space-y-2 relative overflow-hidden shadow-sm">
-          <div className="flex items-center space-x-1.5">
-            <span className="material-symbols-outlined text-[18px] text-secondary">home</span>
-            <span className="font-headline-md text-headline-md tracking-tight">固定支出</span>
-          </div>
+      {/* Insight callout */}
+      <section className="flex flex-col bg-secondary-fixed text-on-secondary-fixed rounded-xl p-space-lg space-y-2 relative overflow-hidden shadow-sm">
+        <div className="flex items-center space-x-1.5">
+          <span className="material-symbols-outlined text-[18px] text-secondary">insights</span>
+          <span className="font-headline-md text-headline-md tracking-tight">小结</span>
+        </div>
+        <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
+          {periodLabel}，你已经用{' '}
+          <span className="font-metric-sm text-metric-sm text-secondary font-semibold">{formatDuration(totals.expenseHours)}</span>{' '}
+          的工作时间换来了消费，相当于{' '}
+          <span className="font-metric-sm text-metric-sm text-secondary font-semibold">{spentDays.toFixed(1)} 个工作日</span>。
+        </p>
+        {rent && (
           <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
             本月已经工作{' '}
             <span className="font-metric-sm text-metric-sm text-secondary font-semibold">{formatDuration(rent.hours)}</span>
             ，只为了支付房租。
           </p>
-        </section>
-      )}
+        )}
+        {categoryStats.length > 0 && (
+          <p className="font-body-md text-body-md leading-relaxed text-on-secondary-fixed">
+            本月的工作时间，主要换来了：
+            {categoryStats
+              .slice(0, 3)
+              .map((c) => `${c.category} ${formatHM(c.hours)}`)
+              .join('、')}
+            。
+          </p>
+        )}
+      </section>
     </div>
   )
 }
