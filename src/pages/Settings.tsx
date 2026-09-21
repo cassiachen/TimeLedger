@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { restartTutorial } from '../store/useTutorial'
 import { getItem, setItem } from '../lib/storage'
 import { DEFAULT_HOUSEWORK_HOURS, DEFAULT_MEAL_HOURS, DEFAULT_SLEEP_HOURS, getHourlyWage } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
@@ -40,6 +42,7 @@ function useNumField(initial: number) {
 export function Settings() {
   const { wageSettings, setWageSettings, demoCleared, clearDemoData, resetToDemoData } = useLedger()
   const { askConfirm } = useUI()
+  const navigate = useNavigate()
   const incomeField = useNumField(wageSettings.monthlyIncome)
   const daysField = useNumField(wageSettings.workDays)
   const hoursField = useNumField(wageSettings.workHoursPerDay)
@@ -455,6 +458,29 @@ export function Settings() {
                 <span className="font-body-sm text-body-sm text-on-surface-variant">清除所有演示数据</span>
               )}
             </div>
+          </div>
+          <span className="material-symbols-outlined text-[18px] text-outline/50">chevron_right</span>
+        </button>
+        <button
+          onClick={() => {
+            restartTutorial()
+            navigate('/')
+          }}
+          className="w-full flex items-center justify-between px-4 py-3.5 border-t border-surface-container active:bg-surface-container-low"
+        >
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-[20px] text-on-surface-variant">school</span>
+            <span className="font-body-md text-body-md text-on-surface">再看一遍新手教程</span>
+          </div>
+          <span className="material-symbols-outlined text-[18px] text-outline/50">chevron_right</span>
+        </button>
+        <button
+          onClick={() => navigate('/guide')}
+          className="w-full flex items-center justify-between px-4 py-3.5 border-t border-surface-container active:bg-surface-container-low"
+        >
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-[20px] text-on-surface-variant">menu_book</span>
+            <span className="font-body-md text-body-md text-on-surface">功能一览</span>
           </div>
           <span className="material-symbols-outlined text-[18px] text-outline/50">chevron_right</span>
         </button>

@@ -18,7 +18,7 @@ export function TransactionRow({ txn }: { txn: Transaction }) {
     : getCategoryIcon(isExpense ? expenseCategories : incomeCategories, txn.category)
 
   const title = txn.merchant || txn.category || (isTransfer ? '转账' : '记录')
-  const metaParts = [formatTime(txn.timestamp), isTransfer ? `${txn.account} → ${txn.toAccount}` : txn.account].filter(
+  const metaParts = [formatTime(txn.timestamp), isTransfer ? `${txn.account} → ${txn.toAccount}` : txn.category].filter(
     Boolean
   )
 
@@ -46,16 +46,9 @@ export function TransactionRow({ txn }: { txn: Transaction }) {
           <span className="material-symbols-outlined text-[20px]">{icon}</span>
         </div>
         <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={`font-body-md text-body-md text-on-surface truncate ${isIncome ? 'font-semibold' : 'font-medium'}`}>
-              {title}
-            </span>
-            {!isTransfer && txn.category && (
-              <span className="px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-mono text-label-mono shrink-0">
-                {txn.category}
-              </span>
-            )}
-          </div>
+          <span className={`font-body-md text-body-md text-on-surface truncate ${isIncome ? 'font-semibold' : 'font-medium'}`}>
+            {title}
+          </span>
           <div className="flex items-center gap-1.5 mt-0.5 font-label-mono text-label-mono text-outline truncate">
             {metaParts.map((p, i) => (
               <span key={i} className="truncate">
@@ -68,30 +61,20 @@ export function TransactionRow({ txn }: { txn: Transaction }) {
       </div>
       <div className="flex items-center gap-1 shrink-0 pl-2">
         <div className="flex flex-col items-end shrink-0">
-          {isExpense && (
-            <div
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-metric-sm text-metric-sm font-semibold ${
-                prominent ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-surface-container text-on-surface-variant'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[13px]">{prominent ? 'hourglass_bottom' : 'schedule'}</span>
-              <span>-{formatDurationShort(hours)}</span>
-            </div>
-          )}
-          {isIncome && (
-            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-metric-sm text-metric-sm font-semibold">
-              <span className="material-symbols-outlined text-[13px] text-outline">history_toggle_off</span>
-              <span>+{formatDurationShort(hours)}</span>
-            </div>
-          )}
           <span
-            className={`font-metric-sm text-metric-sm mt-1 ${
-              isIncome ? 'text-on-surface font-medium' : 'text-on-surface-variant'
+            className={`font-metric-md text-metric-md font-semibold ${
+              isIncome ? 'text-positive' : isExpense && prominent ? 'text-secondary' : 'text-on-surface'
             }`}
           >
-            {isIncome ? '+' : isExpense ? '' : ''}
+            {isIncome ? '+' : ''}
             {formatMoney(txn.amount)}
           </span>
+          {(isExpense || isIncome) && (
+            <span className="font-metric-sm text-metric-sm text-on-surface-variant mt-0.5">
+              {isIncome ? '+' : '-'}
+              {formatDurationShort(hours)}
+            </span>
+          )}
         </div>
         <button
           onClick={handleDelete}

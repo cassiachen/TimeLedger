@@ -13,11 +13,12 @@ export function MyTimeCard() {
       <Link to="/time" className="flex items-center gap-3 flex-1 min-w-0">
         <span className="material-symbols-outlined text-secondary text-[22px]">hourglass_top</span>
         <div className="flex flex-col min-w-0">
-          <span className="font-label-md text-label-md text-on-surface-variant">我的时间 · 时间账本</span>
-          <span className="font-body-md text-body-md text-on-surface truncate">
-            已使用{' '}
-            <span className="font-metric-sm text-metric-sm font-semibold">{formatMinutes(my.arrangedMin)}</span>
-            <span className="text-on-surface-variant">　还剩 {formatMinutes(my.remainingMin)}</span>
+          <span className="font-body-md text-body-md text-on-surface">
+            属于你的时间为{' '}
+            <span className="font-metric-sm text-metric-sm font-semibold">{formatMinutes(my.freeMin)}</span>
+          </span>
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            {my.remainingMin > 0 ? '今天，你想把剩下的时间给什么？' : '今天的时间都有了去处。'}
           </span>
         </div>
         <span className="material-symbols-outlined text-[18px] text-outline ml-auto">chevron_right</span>

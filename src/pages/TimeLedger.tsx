@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { DayBreakdown } from '../components/DayBreakdown'
 import { useMyTime } from '../components/useMyTime'
 import { getTodayKey, makeMonthDays } from '../lib/date'
 import { isWorkday } from '../lib/earnings'
@@ -96,6 +97,8 @@ export function TimeLedger() {
           钱有账本，时间也有。除了工作和生存，你的时间去了哪里？
         </p>
       </div>
+
+      <DayBreakdown />
 
       {/* 今天 */}
       <section className="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col gap-space-md">

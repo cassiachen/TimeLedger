@@ -128,3 +128,43 @@ export function buildMonthReport(year: number, month0: number, byDay: Map<string
   const netMoney = workIncome + extraIncome - expense
   return { days, workIncome, extraIncome, expense, netMoney, netHours: amountToHours(netMoney, ctx.hourlyWage) }
 }
+
+export interface RangeReport {
+  workIncome: number
+  extraIncome: number
+  income: number
+  expense: number
+  netMoney: number
+  incomeHours: number
+  expenseHours: number
+  netHours: number
+}
+
+/** 把 startKey 到 endKey（含）之间每一天的收入和支出加起来，用来算周 / 月 / 年的收入和结余 */
+export function buildRangeReport(startKey: string, endKey: string, byDay: Map<string, Transaction[]>, ctx: EarningsCtx): RangeReport {
+  let workIncome = 0
+  let extraIncome = 0
+  let expense = 0
+  const d = parseDayKey(startKey)
+  const end = parseDayKey(endKey).getTime()
+  while (d.getTime() <= end) {
+    const key = makeDayKey(d.getFullYear(), d.getMonth(), d.getDate())
+    const r = buildDayReport(key, byDay.get(key) || [], ctx)
+    workIncome += r.workIncome
+    extraIncome += r.extraIncome
+    expense += r.expense
+    d.setDate(d.getDate() + 1)
+  }
+  const income = workIncome + extraIncome
+  const netMoney = income - expense
+  return {
+    workIncome,
+    extraIncome,
+    income,
+    expense,
+    netMoney,
+    incomeHours: amountToHours(income, ctx.hourlyWage),
+    expenseHours: amountToHours(expense, ctx.hourlyWage),
+    netHours: amountToHours(netMoney, ctx.hourlyWage),
+  }
+}

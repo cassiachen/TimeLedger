@@ -134,22 +134,21 @@ export function Bills() {
               <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
               <span className="font-label-mono text-label-mono text-outline uppercase tracking-wider">本月收支（折合时间）</span>
             </div>
-            <span className="font-label-mono text-label-mono text-secondary font-medium">
-              {netHours >= 0 ? '本月结余 +' : '本月赤字 '}
-              {netHours < 0 ? '-' : ''}
-              {formatHM(Math.abs(netHours))}
+            <span className={`font-label-mono text-label-mono font-medium ${netHours >= 0 ? 'text-positive' : 'text-secondary'}`}>
+              {netHours >= 0 ? '本月结余 +' : '本月赤字 -'}
+              {formatMoney(Math.abs(Math.round(monthIncome - monthExpense)))}
             </span>
           </div>
           <div className="flex flex-wrap gap-y-1 items-baseline justify-between text-on-surface">
             <div className="flex items-baseline gap-1.5 shrink-0">
               <span className="font-label-md text-label-md text-outline">支出</span>
-              <span className="font-metric-md text-metric-md text-secondary font-semibold">{formatHM(monthExpenseHours)}</span>
-              <span className="font-metric-sm text-metric-sm text-outline">{formatMoney(monthExpense)}</span>
+              <span className="font-metric-md text-metric-md text-secondary font-semibold">{formatMoney(Math.round(monthExpense))}</span>
+              <span className="font-metric-sm text-metric-sm text-outline">-{formatHM(monthExpenseHours)}</span>
             </div>
             <div className="flex items-baseline gap-1.5 shrink-0">
               <span className="font-label-md text-label-md text-outline">收入（含打工）</span>
-              <span className="font-metric-md text-metric-md text-on-surface font-semibold">+{formatHM(monthIncomeHours)}</span>
-              <span className="font-metric-sm text-metric-sm text-outline">{formatMoney(monthIncome)}</span>
+              <span className="font-metric-md text-metric-md text-positive font-semibold">+{formatMoney(Math.round(monthIncome))}</span>
+              <span className="font-metric-sm text-metric-sm text-outline">+{formatHM(monthIncomeHours)}</span>
             </div>
           </div>
           <div className="w-full h-1 bg-surface-container rounded-full overflow-hidden flex mt-0.5">
@@ -181,13 +180,13 @@ export function Bills() {
                   </div>
                   <div className="flex items-baseline gap-1.5">
                     <span className="font-label-md text-label-md text-outline">{isSurplus ? '结余' : '赤字'}</span>
-                    <span className={`font-metric-md text-metric-md font-medium ${isSurplus ? 'text-on-surface' : 'text-secondary'}`}>
+                    <span className={`font-metric-md text-metric-md font-medium ${isSurplus ? 'text-positive' : 'text-secondary'}`}>
                       {isSurplus ? '+' : '-'}
-                      {formatHM(netHoursForDay)}
+                      {formatMoney(Math.abs(Math.round(net)))}
                     </span>
                     <span className="font-metric-sm text-metric-sm text-outline">
-                      {isSurplus ? '+' : ''}
-                      {formatMoney(net)}
+                      {isSurplus ? '+' : '-'}
+                      {formatHM(netHoursForDay)}
                     </span>
                   </div>
                 </div>

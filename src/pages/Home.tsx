@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MyTimeCard } from '../components/MyTimeCard'
+import { StartChecklist } from '../components/StartChecklist'
 import { TickerNumber } from '../components/TickerNumber'
 import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
@@ -64,20 +65,16 @@ export function Home() {
   return (
     <div className="flex flex-col w-full gap-space-lg">
       {/* Top Greeting & Chrono Meta */}
-      <section className="flex flex-col pt-space-xs">
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-          <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
-            今天
-          </span>
-        </div>
-        <h2 className="font-headline-md text-headline-md text-on-surface mt-0.5 tracking-tight">
+      <section className="flex flex-col pt-space-md">
+        <h2 className="font-headline-md text-headline-md text-on-surface tracking-tight">
           {formatFullDate(Date.now())}
         </h2>
       </section>
 
+      <StartChecklist />
+
       {/* Hero Time-Cost Ledger Module */}
-      <section className="relative overflow-hidden rounded-xl bg-primary-container text-on-primary p-space-lg shadow-sm">
+      <section id="home-hero" className="relative overflow-hidden rounded-xl bg-primary-container text-on-primary p-space-lg shadow-sm">
         <div className="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-secondary/10 blur-2xl pointer-events-none" />
         <div className="absolute left-1/3 bottom-0 w-32 h-32 rounded-full bg-primary-fixed-dim/5 blur-xl pointer-events-none" />
         <div className="relative flex flex-col gap-space-md">
@@ -131,7 +128,7 @@ export function Home() {
             <div className="flex items-baseline justify-between gap-2">
               <TickerNumber
                 value={fmt(incomeTotal)}
-                className="font-metric-lg text-display-lg-mobile font-semibold tracking-tight text-secondary-fixed"
+                className="font-metric-lg text-display-lg-mobile font-semibold tracking-tight text-positive-light"
               />
               <span className="font-label-mono text-label-mono text-on-primary-container/80 shrink-0">
                 +{formatHM(incomeHours)}
@@ -147,11 +144,11 @@ export function Home() {
             </div>
             <div className="flex flex-col">
               <span className="font-label-mono text-label-mono text-on-primary-container">{net >= 0 ? '今日结余' : '今日赤字'}</span>
-              <span className="font-metric-sm text-metric-sm text-secondary-fixed mt-0.5">
+              <span className={`font-metric-sm text-metric-sm mt-0.5 ${net >= 0 ? 'text-positive-light' : 'text-secondary-fixed'}`}>
                 {net >= 0 ? '+' : '-'}
                 {fmt(Math.abs(net))}
               </span>
-              <span className="font-label-mono text-label-mono text-secondary-fixed">
+              <span className={`font-label-mono text-label-mono ${net >= 0 ? 'text-positive-light' : 'text-secondary-fixed'}`}>
                 {net >= 0 ? '+' : '-'}
                 {formatHM(netHours)}
               </span>

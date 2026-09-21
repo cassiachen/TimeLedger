@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
-import { DayBreakdown } from '../components/DayBreakdown'
 import { MonthCalendar } from '../components/MonthCalendar'
 import { getCategoryIcon } from '../lib/categories'
-import { getCurrentMonthKey, getMonthKey } from '../lib/date'
+import { getCurrentMonthKey, getMonthKey, getTodayKey } from '../lib/date'
+import { buildRangeReport, groupByDay } from '../lib/earnings'
+import { weekStartKey } from '../lib/time-plan'
 import {
   getDailyTrend,
   getExpenseCategoryStats,
@@ -18,7 +19,7 @@ import { useLedger } from '../store/LedgerContext'
 type Period = '周' | '月' | '年'
 
 export function Stats() {
-  const { transactions, hourlyWage, expenseCategories, wageSettings } = useLedger()
+  const { transactions, hourlyWage, expenseCategories, wageSettings, dayOverrides, now: ledgerNow } = useLedger()
   const [period, setPeriod] = useState<Period>('月')
 
   const weekTotals = useMemo(() => getWeekTotals(transactions, hourlyWage), [transactions, hourlyWage])
@@ -32,14 +33,20 @@ export function Stats() {
   }
   const totals = totalsByPeriod[period]
 
+  // 周 / 月 / 年的收入和结余：打工收入按工作日累计，和首页同一个口径
+  const money = useMemo(() => {
+    const today = getTodayKey()
+    const y = today.slice(0, 4)
+    const startByPeriod: Record<Period, string> = { '周': weekStartKey(), '月': `${today.slice(0, 7)}-01`, '年': `${y}-01-01` }
+    return buildRangeReport(startByPeriod[period], today, groupByDay(transactions), {
+      settings: wageSettings,
+      overrides: dayOverrides,
+      hourlyWage,
+      now: ledgerNow,
+    })
+  }, [period, transactions, wageSettings, dayOverrides, hourlyWage, ledgerNow])
+
   const dailyHours = getDailyHours(wageSettings)
-  const standardHoursByPeriod: Record<Period, number> = {
-    '周': dailyHours * 7,
-    '月': wageSettings.workDays * dailyHours,
-    '年': wageSettings.workDays * dailyHours * 12,
-  }
-  const standardHours = standardHoursByPeriod[period] || 1
-  const exhaustionRatio = (totals.expenseHours / standardHours) * 100
 
   const PERIOD_LABEL: Record<Period, string> = { '周': '本周', '月': '本月', '年': '本年' }
   const periodLabel = PERIOD_LABEL[period]
@@ -52,11 +59,6 @@ export function Stats() {
   const totalCategoryAmount = categoryStats.reduce((s, c) => s + c.amount, 0) || 1
 
   const trend = useMemo(() => getDailyTrend(transactions, hourlyWage, 18), [transactions, hourlyWage])
-  const now = new Date()
-  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000)
-  const dayCount = period === '周' ? 7 : period === '年' ? dayOfYear : now.getDate()
-  const dailyAvgHours = totals.expenseHours / dayCount
-  const freedomRatio = 100 - exhaustionRatio
   const rent = categoryStats.find((c) => c.category === '居住')
   const spentDays = dailyHours > 0 ? totals.expenseHours / dailyHours : 0
 
@@ -81,55 +83,58 @@ export function Stats() {
         </div>
       </section>
 
-      {/* Hero card */}
+      {/* 收支：结余最大，收入和支出并排，最下面一条比例条 */}
       <section className="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm space-y-space-md">
-        <div className="flex flex-col space-y-1">
-          <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">
-            {periodLabel}花掉的时间
-          </span>
-          <div className="flex items-baseline space-x-1.5">
-            <span className="font-display-lg-mobile text-display-lg-mobile text-on-surface tracking-tight">
-              {totals.expenseHours.toFixed(1)}
-            </span>
-            <span className="font-metric-md text-metric-md text-secondary font-medium">小时</span>
-          </div>
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
-            占{periodLabel}工作时间（
-            <span className="font-metric-sm text-metric-sm text-on-surface font-medium">{standardHours.toFixed(0)}h</span>）的{' '}
-            <span className="font-metric-sm text-metric-sm text-secondary font-medium">{exhaustionRatio.toFixed(1)}%</span>
-          </span>
-        </div>
+        <span className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">{periodLabel}收支</span>
 
-        <div className="flex flex-col space-y-1.5 pt-1">
-          <div className="w-full h-2 rounded bg-surface-container-high overflow-hidden flex">
-            <div className="h-full bg-secondary transition-all duration-700" style={{ width: `${Math.min(100, exhaustionRatio)}%` }} />
-            <div className="h-full bg-surface-container-highest" style={{ width: `${Math.max(0, 100 - exhaustionRatio)}%` }} />
-          </div>
-          <div className="flex items-center justify-end font-label-mono text-label-mono text-on-surface-variant">
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-surface-variant inline-block" />
-              还剩 {Math.max(0, standardHours - totals.expenseHours).toFixed(1)}h
+        <div className="flex flex-col gap-0.5">
+          <span className="font-body-sm text-body-sm text-on-surface-variant">{money.netMoney >= 0 ? '结余' : '赤字'}</span>
+          <div className="flex items-baseline gap-2">
+            <span
+              className={`font-metric-lg text-display-lg-mobile tracking-tight ${money.netMoney >= 0 ? 'text-positive' : 'text-secondary'}`}
+            >
+              {money.netMoney >= 0 ? '+' : '-'}
+              {formatMoney(Math.abs(Math.round(money.netMoney)))}
+            </span>
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
+              {money.netMoney >= 0 ? '+' : '-'}
+              {formatHM(Math.abs(money.netHours))}
             </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 pt-2 bg-surface-container-low p-2.5 rounded-lg">
-          <div className="flex flex-col min-w-0">
-            <span className="font-label-md text-label-md text-on-surface-variant">支出合计</span>
-            <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{formatMoney(totals.expense)}</span>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col">
+            <span className="font-body-sm text-body-sm text-on-surface-variant">收入</span>
+            <span className="font-metric-lg text-headline-md text-positive">{formatMoney(Math.round(money.income))}</span>
+            <span className="font-body-sm text-body-sm text-on-surface-variant">+{formatHM(money.incomeHours)}</span>
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-label-md text-label-md text-on-surface-variant">日均花掉时间</span>
-            <span className="font-metric-sm text-metric-sm text-secondary font-medium mt-0.5 truncate">{dailyAvgHours.toFixed(1)}h</span>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-label-md text-label-md text-on-surface-variant">剩余占比</span>
-            <span className="font-metric-sm text-metric-sm text-on-surface font-medium mt-0.5 truncate">{Math.max(0, freedomRatio).toFixed(1)}%</span>
+          <div className="flex flex-col">
+            <span className="font-body-sm text-body-sm text-on-surface-variant">支出</span>
+            <span className="font-metric-lg text-headline-md text-secondary">{formatMoney(Math.round(money.expense))}</span>
+            <span className="font-body-sm text-body-sm text-on-surface-variant">-{formatHM(money.expenseHours)}</span>
           </div>
         </div>
+
+        {money.income > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <div className="w-full h-2.5 rounded bg-surface-container-high overflow-hidden flex">
+              <div className="h-full bg-secondary transition-all duration-700" style={{ width: `${Math.min(100, (money.expense / money.income) * 100)}%` }} />
+              <div className="h-full bg-positive flex-1" />
+            </div>
+            <div className="flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
+              <span>
+                <span className="inline-block w-2 h-2 rounded-full bg-secondary mr-1.5" />
+                支出 {Math.min(100, Math.round((money.expense / money.income) * 100))}%
+              </span>
+              <span>
+                <span className="inline-block w-2 h-2 rounded-full bg-positive mr-1.5" />
+                {money.netMoney >= 0 ? `结余 ${Math.round((money.netMoney / money.income) * 100)}%` : '没有结余'}
+              </span>
+            </div>
+          </div>
+        )}
       </section>
-
-      <DayBreakdown />
 
       <MonthCalendar />
 

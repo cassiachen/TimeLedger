@@ -7,9 +7,10 @@ import { TransactionList } from './TransactionList'
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
-function shortHours(h: number): string {
-  const v = Math.abs(h) < 0.05 ? 0 : h
-  return `${v > 0 ? '+' : ''}${v.toFixed(1)}`
+/** 日历格子里的金额：取整，正数带 +，例如 +¥284 / -¥52 */
+function shortMoney(m: number): string {
+  const v = Math.round(m)
+  return `${v > 0 ? '+' : v < 0 ? '-' : ''}¥${Math.abs(v).toLocaleString('zh-CN')}`
 }
 
 export function MonthCalendar() {
@@ -55,7 +56,7 @@ export function MonthCalendar() {
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span className="font-headline-md text-headline-md text-on-surface tracking-tight">时间日历</span>
-          <span className="font-label-mono text-label-mono text-on-surface-variant">每格 = 当天赚到的 − 花掉的（小时）</span>
+          <span className="font-label-mono text-label-mono text-on-surface-variant">每格 = 当天赚到的 − 花掉的（元）</span>
         </div>
         <div className="flex items-center gap-1">
           <button onClick={() => shiftMonth(-1)} className="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" aria-label="上个月">
@@ -78,7 +79,7 @@ export function MonthCalendar() {
       <div className="grid grid-cols-3 gap-2 bg-surface-container-low p-2.5 rounded-lg">
         <div className="flex flex-col min-w-0">
           <span className="font-label-md text-label-md text-on-surface-variant">打工收入</span>
-          <span className="font-metric-sm text-metric-sm text-on-surface font-medium truncate">{fmtWork(report.workIncome, isCurrentMonth && todayAccruing)}</span>
+          <span className="font-metric-sm text-metric-sm text-positive font-medium truncate">{fmtWork(report.workIncome, isCurrentMonth && todayAccruing)}</span>
         </div>
         <div className="flex flex-col min-w-0">
           <span className="font-label-md text-label-md text-on-surface-variant">消费</span>
@@ -86,8 +87,8 @@ export function MonthCalendar() {
         </div>
         <div className="flex flex-col min-w-0">
           <span className="font-label-md text-label-md text-on-surface-variant">{report.netMoney >= 0 ? '本月结余' : '本月赤字'}</span>
-          <span className={`font-metric-sm text-metric-sm font-medium truncate ${report.netMoney >= 0 ? 'text-on-surface' : 'text-secondary'}`}>
-            {shortHours(report.netHours)}h
+          <span className={`font-metric-sm text-metric-sm font-medium truncate ${report.netMoney >= 0 ? 'text-positive' : 'text-secondary'}`}>
+            {shortMoney(report.netMoney)}
           </span>
         </div>
       </div>
@@ -118,9 +119,13 @@ export function MonthCalendar() {
               } ${isSelected ? 'ring-2 ring-primary' : ''} ${d.dayKey === todayKey ? 'font-bold' : ''}`}
             >
               <span className="font-metric-sm text-metric-sm leading-none">{dayNum}</span>
-              <span className="font-label-mono text-[10px] leading-none opacity-80">
-                {d.isFuture || (!d.isWorkday && d.netMoney === 0) ? '·' : shortHours(d.netHours)}
-              </span>
+              {d.isFuture || (!d.isWorkday && d.netMoney === 0) ? (
+                <span className="font-label-mono text-[10px] leading-none opacity-80">·</span>
+              ) : (
+                <span className={`font-label-mono text-[10px] leading-none ${d.netMoney >= 0 ? 'text-positive' : 'text-secondary'}`}>
+                  {shortMoney(d.netMoney)}
+                </span>
+              )}
             </button>
           )
         })}
@@ -144,17 +149,17 @@ export function MonthCalendar() {
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 font-metric-sm text-metric-sm">
             <span className="text-on-surface-variant">
-              打工所得 <span className="text-on-surface">{selectedReport.isFuture ? '—' : `+${fmtWork(selectedReport.workIncome, selectedReport.dayKey === todayKey && todayAccruing)}`}</span>
+              打工所得 <span className="text-positive">{selectedReport.isFuture ? '—' : `+${fmtWork(selectedReport.workIncome, selectedReport.dayKey === todayKey && todayAccruing)}`}</span>
             </span>
             <span className="text-on-surface-variant">
-              其他收入 <span className="text-on-surface">+{formatMoney(selectedReport.extraIncome)}</span>
+              其他收入 <span className="text-positive">+{formatMoney(selectedReport.extraIncome)}</span>
             </span>
             <span className="text-on-surface-variant">
               消费 <span className="text-secondary">-{formatMoney(selectedReport.expense)}</span>
             </span>
             <span className="text-on-surface-variant">
               {selectedReport.netMoney >= 0 ? '结余' : '赤字'}{' '}
-              <span className={selectedReport.netMoney >= 0 ? 'text-on-surface' : 'text-secondary'}>
+              <span className={selectedReport.netMoney >= 0 ? 'text-positive' : 'text-secondary'}>
                 {selectedReport.netMoney >= 0 ? '+' : '-'}
                 {formatHM(Math.abs(selectedReport.netHours))}
               </span>
