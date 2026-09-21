@@ -21,7 +21,7 @@ export function workFraction(now: number, settings: WageSettings): number {
   const start = settings.workStartHour ?? DEFAULT_WORK_START_HOUR
   const span = settings.workHoursPerDay || 8
   const d = new Date(now)
-  const hour = d.getHours() + d.getMinutes() / 60
+  const hour = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600
   return Math.min(1, Math.max(0, (hour - start) / span))
 }
 

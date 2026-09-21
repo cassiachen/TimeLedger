@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
@@ -7,8 +7,18 @@ import { filterByDay, getTodayTotals } from '../lib/selectors'
 import { amountToHours, formatHM, formatMoney, getDailyHours, getDayBreakdown } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
+function settingsDaily(s: { monthlyIncome: number; workDays: number }) {
+  return s.workDays > 0 ? s.monthlyIncome / s.workDays : 0
+}
+
 export function Home() {
-  const { transactions, hourlyWage, wageSettings, dayOverrides, now } = useLedger()
+  const { transactions, hourlyWage, wageSettings, dayOverrides } = useLedger()
+  // 每秒走一次，今日收入跟着时间一点点涨
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
 
   const todayTotals = useMemo(() => getTodayTotals(transactions, hourlyWage), [transactions, hourlyWage])
   const todayTxns = useMemo(
@@ -31,6 +41,9 @@ export function Home() {
   const expenseTotal = todayReport.expense
   const net = incomeTotal - expenseTotal
   const netHours = amountToHours(Math.abs(net), hourlyWage)
+  // 打工收入还在累计时显示到分，才看得到数字在涨
+  const accruing = todayReport.isWorkday && todayReport.workIncome > 0 && todayReport.workIncome < settingsDaily(wageSettings)
+  const fmt = (v: number) => (accruing ? `¥${v.toFixed(2)}` : formatMoney(Math.round(v)))
   const heroTotalMinutes = Math.round(todayTotals.expenseHours * 60)
   const heroH = Math.floor(heroTotalMinutes / 60)
   const heroM = heroTotalMinutes % 60
@@ -101,7 +114,7 @@ export function Home() {
           <div className="grid grid-cols-3 gap-2 pt-space-sm border-t border-surface-container-highest/10">
             <div className="flex flex-col">
               <span className="font-label-mono text-label-mono text-on-primary-container">今日收入</span>
-              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatMoney(Math.round(incomeTotal))}</span>
+              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{fmt(incomeTotal)}</span>
               <span className="font-label-mono text-label-mono text-on-primary-container/80">+{formatHM(incomeHours)}</span>
             </div>
             <div className="flex flex-col">
@@ -113,7 +126,7 @@ export function Home() {
               <span className="font-label-mono text-label-mono text-on-primary-container">{net >= 0 ? '今日结余' : '今日赤字'}</span>
               <span className="font-metric-sm text-metric-sm text-secondary-fixed mt-0.5">
                 {net >= 0 ? '+' : '-'}
-                {formatMoney(Math.abs(Math.round(net)))}
+                {fmt(Math.abs(net))}
               </span>
               <span className="font-label-mono text-label-mono text-secondary-fixed">
                 {net >= 0 ? '+' : '-'}
