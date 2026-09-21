@@ -232,3 +232,23 @@ body {
 * {
   scrollbar-width: none;
 }
+
+/* 跳动的数字：每一位变化时往上翻一下 */
+@keyframes digit-tick {
+  0% { transform: translateY(45%); opacity: 0.2; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.digit-tick {
+  display: inline-block;
+  animation: digit-tick 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes live-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(255 183 130 / 0.45); }
+  50% { box-shadow: 0 0 0 6px rgb(255 183 130 / 0); }
+}
+.live-dot {
+  animation: live-glow 1.6s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .digit-tick, .live-dot { animation: none; }
+}

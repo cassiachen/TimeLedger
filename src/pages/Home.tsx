@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { TickerNumber } from '../components/TickerNumber'
 import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
 import { buildDayReport } from '../lib/earnings'
@@ -122,12 +123,25 @@ export function Home() {
             </span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-space-sm border-t border-surface-container-highest/10">
-            <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">今日收入</span>
-              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{fmt(incomeTotal)}</span>
-              <span className="font-label-mono text-label-mono text-on-primary-container/80">+{formatHM(incomeHours)}</span>
+          <div className="flex flex-col gap-1 pt-space-sm border-t border-surface-container-highest/10">
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full bg-secondary-fixed-dim ${accruing ? 'live-dot' : 'opacity-40'}`} />
+              <span className="font-label-mono text-label-mono text-on-primary-container">
+                {accruing ? '今日收入 · 正在赚' : '今日收入'}
+              </span>
             </div>
+            <div className="flex items-baseline justify-between gap-2">
+              <TickerNumber
+                value={fmt(incomeTotal)}
+                className="font-metric-lg text-display-lg-mobile font-semibold tracking-tight text-secondary-fixed"
+              />
+              <span className="font-label-mono text-label-mono text-on-primary-container/80 shrink-0">
+                +{formatHM(incomeHours)}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col">
               <span className="font-label-mono text-label-mono text-on-primary-container">今日支出</span>
               <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatMoney(expenseTotal)}</span>
