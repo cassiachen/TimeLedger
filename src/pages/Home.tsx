@@ -6,7 +6,7 @@ import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
 import { buildDayReport } from '../lib/earnings'
 import { filterByDay, getTodayTotals } from '../lib/selectors'
-import { amountToHours, formatDuration, formatHM, formatMoney, getDailyHours, getDayBreakdown } from '../lib/time-value'
+import { amountToHours, formatHM, formatMoney, getDailyHours } from '../lib/time-value'
 import { useLedger } from '../store/LedgerContext'
 
 function settingsDaily(s: { monthlyIncome: number; workDays: number }) {
@@ -48,10 +48,7 @@ export function Home() {
   })
   const incomeTotal = todayReport.workIncome + todayReport.extraIncome
   const incomeHours = amountToHours(incomeTotal, hourlyWage)
-  const dayParts = getDayBreakdown(wageSettings)
-  const freeToday = todayReport.isWorkday ? dayParts.free : 24 - dayParts.sleep - dayParts.meals
-  const expenseTotal = todayReport.expense
-  const net = incomeTotal - expenseTotal
+  const net = incomeTotal - todayReport.expense
   const netHours = amountToHours(Math.abs(net), hourlyWage)
   // 打工收入还在累计时显示到分，才看得到数字在涨
   const accruing = todayReport.isWorkday && todayReport.workIncome > 0 && todayReport.workIncome < settingsDaily(wageSettings)
@@ -139,30 +136,13 @@ export function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">今日支出</span>
-              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatMoney(expenseTotal)}</span>
-              <span className="font-label-mono text-label-mono text-on-primary-container/80">-{formatHM(todayTotals.expenseHours)}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">{net >= 0 ? '今日结余' : '今日赤字'}</span>
-              <span className="font-metric-sm text-metric-sm text-secondary-fixed mt-0.5">
-                {net >= 0 ? '+' : '-'}
-                {fmt(Math.abs(net))}
-              </span>
-              <span className="font-label-mono text-label-mono text-secondary-fixed">
-                {net >= 0 ? '+' : '-'}
-                {formatHM(netHours)}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">我的时间</span>
-              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatHM(Math.max(0, freeToday))}</span>
-              <span className="font-label-mono text-label-mono text-on-primary-container/80">
-                {todayReport.isWorkday ? '工作日' : '休息日'} · 占 {Math.round((Math.max(0, freeToday) / 24) * 100)}%
-              </span>
-            </div>
+          <div className="flex items-center justify-between font-label-mono text-label-mono">
+            <span className="text-on-primary-container">{net >= 0 ? '今日结余' : '今日赤字'}（收入 − 支出）</span>
+            <span className="text-secondary-fixed">
+              {net >= 0 ? '+' : '-'}
+              {fmt(Math.abs(net))} · {net >= 0 ? '+' : '-'}
+              {formatHM(netHours)}
+            </span>
           </div>
         </div>
       </section>
@@ -179,14 +159,6 @@ export function Home() {
           <span className="material-symbols-outlined text-[20px]">filter_list</span>
         </Link>
       </section>
-
-      {todayTxns.length > 0 && todayTotals.expenseHours > 0 && (
-        <p className="font-body-sm text-body-sm text-on-surface-variant -mt-space-sm">
-          今天，你用{' '}
-          <span className="font-metric-sm text-metric-sm text-secondary font-medium">{formatDuration(todayTotals.expenseHours)}</span>{' '}
-          的工作时间，换来了这些东西。
-        </p>
-      )}
 
       {/* Ledger Transaction List */}
       {todayTxns.length === 0 ? (

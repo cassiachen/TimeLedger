@@ -75,14 +75,10 @@ export function MonthCalendar() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 bg-surface-container-low p-2.5 rounded-lg">
+      <div className="grid grid-cols-2 gap-2 bg-surface-container-low p-2.5 rounded-lg">
         <div className="flex flex-col min-w-0">
           <span className="font-label-md text-label-md text-on-surface-variant">打工收入</span>
           <span className="font-metric-sm text-metric-sm text-on-surface font-medium truncate">{fmtWork(report.workIncome, isCurrentMonth && todayAccruing)}</span>
-        </div>
-        <div className="flex flex-col min-w-0">
-          <span className="font-label-md text-label-md text-on-surface-variant">消费</span>
-          <span className="font-metric-sm text-metric-sm text-secondary font-medium truncate">{formatMoney(Math.round(report.expense))}</span>
         </div>
         <div className="flex flex-col min-w-0">
           <span className="font-label-md text-label-md text-on-surface-variant">{report.netMoney >= 0 ? '本月结余' : '本月赤字'}</span>
