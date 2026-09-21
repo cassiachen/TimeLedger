@@ -40,7 +40,8 @@ export interface TimeGoal {
   /** 想换到什么，比如 IELTS 7.5；不填就用活动名 */
   title?: string
   targetHours: number
-  weeklyHours: number
+  /** 旧版本存过的每周计划，现在不再使用 */
+  weeklyHours?: number
 }
 
 export interface Category {

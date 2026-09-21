@@ -54,17 +54,15 @@ export function TimeLedger() {
   const [gName, setGName] = useState('')
   const [gTitle, setGTitle] = useState('')
   const [gTarget, setGTarget] = useState('')
-  const [gWeekly, setGWeekly] = useState('')
 
   function saveGoal() {
     const name = gName.trim()
     const target = parseFloat(gTarget)
     if (!name || !(target > 0)) return
-    addTimeGoal({ name, title: gTitle.trim() || undefined, targetHours: target, weeklyHours: parseFloat(gWeekly) || 0 })
+    addTimeGoal({ name, title: gTitle.trim() || undefined, targetHours: target })
     setGName('')
     setGTitle('')
     setGTarget('')
-    setGWeekly('')
     setAdding(false)
   }
 
@@ -104,11 +102,11 @@ export function TimeLedger() {
         <div className="flex items-baseline justify-between">
           <span className="font-headline-md text-headline-md text-on-surface">今天</span>
           <span className="font-label-mono text-label-mono text-on-surface-variant">
-            属于我的 {formatMinutes(my.freeMin)} · 还剩 {formatMinutes(my.remainingMin)}
+            我的时间 {formatMinutes(my.freeMin)} · 还剩 {formatMinutes(my.remainingMin)}
           </span>
         </div>
         {my.todayEntries.length === 0 ? (
-          <p className="font-body-sm text-body-sm text-on-surface-variant">今天还没有安排。</p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">今天还没有记录。</p>
         ) : (
           <div className="flex flex-col divide-y divide-surface-container">
             {my.todayEntries.map((e) => (
@@ -116,7 +114,7 @@ export function TimeLedger() {
                 <span className="material-symbols-outlined text-[18px] text-on-surface-variant">{groupIcon(e.group)}</span>
                 <span className="font-body-md text-body-md text-on-surface flex-1 truncate">{e.activity}</span>
                 <span className="font-metric-sm text-metric-sm text-on-surface-variant">{formatMinutes(e.minutes)}</span>
-                <button onClick={() => deleteTimeEntry(e.id)} className="p-0.5 text-outline hover:text-error" aria-label="删除这条安排">
+                <button onClick={() => deleteTimeEntry(e.id)} className="p-0.5 text-outline hover:text-error" aria-label="删除这条记录">
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
@@ -128,7 +126,7 @@ export function TimeLedger() {
           className="w-full h-11 rounded-lg bg-primary text-on-primary font-body-md text-body-md font-medium flex items-center justify-center gap-1.5"
         >
           <span className="material-symbols-outlined text-[18px]">edit_calendar</span>
-          安排我的时间
+          记录我的时间
         </button>
       </section>
 
@@ -150,10 +148,7 @@ export function TimeLedger() {
           <div className="flex flex-col gap-2 rounded-lg bg-surface-container-low p-3">
             <input value={gName} onChange={(e) => setGName(e.target.value)} placeholder="花时间做什么，比如 IELTS" maxLength={12} className={inputCls} />
             <input value={gTitle} onChange={(e) => setGTitle(e.target.value)} placeholder="想换到什么（可选），比如 IELTS 7.5" maxLength={20} className={inputCls} />
-            <div className="grid grid-cols-2 gap-2">
-              <input value={gTarget} onChange={(e) => setGTarget(e.target.value)} inputMode="decimal" placeholder="预计需要（小时）" className={inputCls} />
-              <input value={gWeekly} onChange={(e) => setGWeekly(e.target.value)} inputMode="decimal" placeholder="每周计划（小时）" className={inputCls} />
-            </div>
+            <input value={gTarget} onChange={(e) => setGTarget(e.target.value)} inputMode="decimal" placeholder="预计需要（小时）" className={inputCls} />
             <div className="flex gap-2">
               <button onClick={() => setAdding(false)} className="flex-1 h-10 rounded bg-surface-container text-on-surface font-label-md text-label-md">
                 取消
@@ -205,10 +200,7 @@ export function TimeLedger() {
               </div>
               <div className="grid grid-cols-3 gap-2 font-label-mono text-label-mono text-on-surface-variant">
                 <span>今日 {hoursText(today)}</span>
-                <span>
-                  本周 {hoursText(week)}
-                  {g.weeklyHours > 0 ? ` / ${g.weeklyHours}h` : ''}
-                </span>
+                <span>本周 {hoursText(week)}</span>
                 <span>本月 {hoursText(mon)}</span>
               </div>
             </div>
@@ -227,7 +219,7 @@ export function TimeLedger() {
           </span>
         </div>
         <div className="flex flex-col gap-3">
-          <span className="font-label-mono text-label-mono text-on-surface-variant">我安排的（来自你的记录）</span>
+          <span className="font-label-mono text-label-mono text-on-surface-variant">我记录的</span>
           {monthRows.arranged.map((r) => renderRow(r, true))}
         </div>
       </section>

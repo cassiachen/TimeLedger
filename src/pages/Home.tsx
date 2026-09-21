@@ -157,7 +157,7 @@ export function Home() {
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-label-mono text-label-mono text-on-primary-container">属于我的时间</span>
+              <span className="font-label-mono text-label-mono text-on-primary-container">我的时间</span>
               <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatHM(Math.max(0, freeToday))}</span>
               <span className="font-label-mono text-label-mono text-on-primary-container/80">
                 {todayReport.isWorkday ? '工作日' : '休息日'} · 占 {Math.round((Math.max(0, freeToday) / 24) * 100)}%

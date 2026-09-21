@@ -46,7 +46,7 @@ export function ArrangeTimeSheet() {
   function save() {
     if (!picked || minutes <= 0 || tooMuch) return
     addTimeEntry({ dayKey: getTodayKey(), activity: picked.activity, group: picked.group, minutes })
-    showToast(`✓ 已安排 ${picked.activity} ${formatMinutes(minutes)}`)
+    showToast(`✓ 已记录 ${picked.activity} ${formatMinutes(minutes)}`)
     setPicked(null)
   }
 
@@ -73,11 +73,11 @@ export function ArrangeTimeSheet() {
       <div className="sheet-content max-w-md mx-auto">
         <div className="flex items-start justify-between gap-3 mb-1">
           <div className="flex flex-col">
-            <h3 className="font-headline-md text-headline-md text-on-surface">今天，你想把剩下的时间给什么？</h3>
+            <h3 className="font-headline-md text-headline-md text-on-surface">今天，你的时间用在了哪里？</h3>
             <span className="font-body-sm text-body-sm text-on-surface-variant mt-1">
               还有{' '}
               <span className="font-metric-sm text-metric-sm text-secondary font-medium">{formatMinutes(my.remainingMin)}</span>{' '}
-              可以安排
+              可以记录
             </span>
           </div>
           <button onClick={closeArrange} className="p-1 -mr-1 text-outline hover:text-on-surface" aria-label="关闭">
@@ -92,7 +92,7 @@ export function ArrangeTimeSheet() {
                 <span className="material-symbols-outlined text-[18px] text-on-surface-variant">{groupIcon(e.group)}</span>
                 <span className="font-body-md text-body-md text-on-surface flex-1 truncate">{e.activity}</span>
                 <span className="font-metric-sm text-metric-sm text-on-surface-variant">{formatMinutes(e.minutes)}</span>
-                <button onClick={() => deleteTimeEntry(e.id)} className="p-0.5 text-outline hover:text-error" aria-label="删除这条安排">
+                <button onClick={() => deleteTimeEntry(e.id)} className="p-0.5 text-outline hover:text-error" aria-label="删除这条记录">
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
@@ -223,10 +223,10 @@ export function ArrangeTimeSheet() {
               className="w-full h-11 rounded-lg bg-primary text-on-primary font-body-md text-body-md font-medium disabled:opacity-40 active:scale-[0.99] transition-transform"
             >
               {my.remainingMin <= 0
-                ? '今天的时间已经安排满了'
+                ? '今天的时间都记满了'
                 : tooMuch
                   ? `今天只剩 ${formatMinutes(my.remainingMin)}`
-                  : '加入今天的安排'}
+                  : '记下这一笔'}
             </button>
           </div>
         )}
