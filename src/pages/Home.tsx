@@ -118,9 +118,6 @@ export function Home() {
                 title={`今天花掉 ${formatHM(todayTotals.expenseHours)}`}
               />
             </div>
-            <span className="font-label-mono text-label-mono text-on-primary-container">
-              {todayReport.isWorkday ? '工作日' : '休息日'}，今天属于自己的时间约 {Math.max(0, freeToday).toFixed(1)} 小时
-            </span>
           </div>
 
           <div className="flex flex-col gap-1 pt-space-sm border-t border-surface-container-highest/10">
@@ -141,7 +138,7 @@ export function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <div className="flex flex-col">
               <span className="font-label-mono text-label-mono text-on-primary-container">今日支出</span>
               <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatMoney(expenseTotal)}</span>
@@ -156,6 +153,13 @@ export function Home() {
               <span className="font-label-mono text-label-mono text-secondary-fixed">
                 {net >= 0 ? '+' : '-'}
                 {formatHM(netHours)}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-mono text-label-mono text-on-primary-container">属于我的时间</span>
+              <span className="font-metric-sm text-metric-sm text-on-primary mt-0.5">{formatHM(Math.max(0, freeToday))}</span>
+              <span className="font-label-mono text-label-mono text-on-primary-container/80">
+                {todayReport.isWorkday ? '工作日' : '休息日'} · 占 {Math.round((Math.max(0, freeToday) / 24) * 100)}%
               </span>
             </div>
           </div>
