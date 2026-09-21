@@ -12,6 +12,7 @@ export function DayBreakdown() {
     { key: 'work', label: '工作', hours: b.work, color: 'bg-on-primary-container' },
     { key: 'commute', label: '通勤', hours: b.commute, color: 'bg-primary-fixed-dim' },
     { key: 'meals', label: '吃饭', hours: b.meals, color: 'bg-outline-variant' },
+    { key: 'housework', label: '家务', hours: b.housework, color: 'bg-surface-variant' },
   ]
 
   return (
@@ -45,7 +46,7 @@ export function DayBreakdown() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 pt-2 bg-surface-container-low p-2.5 rounded-lg">
+      <div className="grid grid-cols-5 gap-1.5 pt-2 bg-surface-container-low p-2.5 rounded-lg">
         {parts.map((p) => (
           <div key={p.key} className="flex flex-col min-w-0">
             <span className="font-label-md text-label-md text-on-surface-variant flex items-center gap-1">
@@ -58,7 +59,7 @@ export function DayBreakdown() {
       </div>
 
       {b.free < 0 && (
-        <p className="font-body-sm text-body-sm text-error">睡觉、吃饭、工作和通勤加起来超过了 24 小时，去设置里调整一下。</p>
+        <p className="font-body-sm text-body-sm text-error">睡觉、吃饭、家务、工作和通勤加起来超过了 24 小时，去设置里调整一下。</p>
       )}
     </section>
   )

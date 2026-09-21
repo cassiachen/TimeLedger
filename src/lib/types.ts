@@ -20,6 +20,27 @@ export interface WageSettings {
   sleepHours?: number
   mealHours?: number
   workStartHour?: number
+  houseworkHours?: number
+}
+
+/** 一条「我的时间」安排：某一天，把多少分钟给了什么 */
+export interface TimeEntry {
+  id: string
+  dayKey: string
+  activity: string
+  /** 大类 key，见 lib/time-plan.ts */
+  group: string
+  minutes: number
+}
+
+/** 想用时间换的目标，比如 IELTS 7.5 */
+export interface TimeGoal {
+  id: string
+  name: string
+  /** 想换到什么，比如 IELTS 7.5；不填就用活动名 */
+  title?: string
+  targetHours: number
+  weeklyHours: number
 }
 
 export interface Category {

@@ -18,6 +18,9 @@ interface UIContextValue {
   openAddModal: (type?: TransactionType) => void
   openEditModal: (txn: Transaction) => void
   closeAddModal: () => void
+  arrangeOpen: boolean
+  openArrange: () => void
+  closeArrange: () => void
   toast: string | null
   showToast: (message: string) => void
   dismissToast: () => void
@@ -33,6 +36,7 @@ let toastTimer: ReturnType<typeof setTimeout> | null = null
 export function UIProvider({ children }: { children: ReactNode }) {
   const [addModal, setAddModal] = useState<AddModalState>({ open: false, type: 'expense', editing: null })
   const [toast, setToast] = useState<string | null>(null)
+  const [arrangeOpen, setArrangeOpen] = useState(false)
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null)
 
   function askConfirm(message: string, onConfirm: () => void, confirmLabel = '删除') {
@@ -73,6 +77,9 @@ export function UIProvider({ children }: { children: ReactNode }) {
         openAddModal,
         openEditModal,
         closeAddModal,
+        arrangeOpen,
+        openArrange: () => setArrangeOpen(true),
+        closeArrange: () => setArrangeOpen(false),
         toast,
         showToast,
         dismissToast,

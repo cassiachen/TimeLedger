@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { MyTimeCard } from '../components/MyTimeCard'
 import { TickerNumber } from '../components/TickerNumber'
 import { TransactionList } from '../components/TransactionList'
 import { formatFullDate, getTodayKey } from '../lib/date'
@@ -165,6 +166,8 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      <MyTimeCard />
 
       {/* Ledger Header Bar */}
       <section className="flex items-center justify-between">

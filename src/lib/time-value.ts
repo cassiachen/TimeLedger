@@ -8,6 +8,7 @@ export function getDailyHours(settings: WageSettings): number {
 export const DEFAULT_WORK_START_HOUR = 9
 export const DEFAULT_SLEEP_HOURS = 7
 export const DEFAULT_MEAL_HOURS = 2
+export const DEFAULT_HOUSEWORK_HOURS = 0.5
 
 /** 一个工作日的 24 小时怎么分：睡觉 / 工作 / 通勤 / 吃饭，剩下的就是自己的时间 */
 export function getDayBreakdown(s: WageSettings) {
@@ -15,7 +16,8 @@ export function getDayBreakdown(s: WageSettings) {
   const meals = s.mealHours ?? DEFAULT_MEAL_HOURS
   const work = s.workHoursPerDay
   const commute = s.commuteHours || 0
-  return { sleep, meals, work, commute, free: 24 - sleep - meals - work - commute }
+  const housework = s.houseworkHours ?? DEFAULT_HOUSEWORK_HOURS
+  return { sleep, meals, housework, work, commute, free: 24 - sleep - meals - housework - work - commute }
 }
 
 export function getHourlyWage(settings: WageSettings): number {

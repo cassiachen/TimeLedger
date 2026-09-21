@@ -4,7 +4,7 @@ import type { DayOverrides, DayStatus } from '../lib/earnings'
 import { getItem, setItem } from '../lib/storage'
 import { DEFAULT_WAGE_SETTINGS, generateSeedTransactions } from '../lib/seed'
 import { getHourlyWage } from '../lib/time-value'
-import type { Category, Transaction, WageSettings } from '../lib/types'
+import type { Category, TimeEntry, TimeGoal, Transaction, WageSettings } from '../lib/types'
 
 const KEYS = {
   transactions: 'tl_transactions',
@@ -13,6 +13,8 @@ const KEYS = {
   onboarded: 'tl_onboarded',
   demoCleared: 'tl_demo_cleared',
   dayOverrides: 'tl_day_overrides',
+  timeEntries: 'tl_time_entries',
+  timeGoals: 'tl_time_goals',
 }
 
 interface LedgerContextValue {
@@ -36,6 +38,14 @@ interface LedgerContextValue {
   clearDemoData: () => void
   resetToDemoData: () => void
 
+  timeEntries: TimeEntry[]
+  addTimeEntry: (e: Omit<TimeEntry, 'id'>) => void
+  deleteTimeEntry: (id: string) => void
+  timeGoals: TimeGoal[]
+  addTimeGoal: (g: Omit<TimeGoal, 'id'>) => void
+  updateTimeGoal: (id: string, patch: Partial<TimeGoal>) => void
+  deleteTimeGoal: (id: string) => void
+
   now: number
   dayOverrides: DayOverrides
   setDayStatus: (dayKey: string, status: DayStatus | null) => void
@@ -55,6 +65,8 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
   )
   const [onboarded, setOnboarded] = useState<boolean>(() => getItem<boolean>(KEYS.onboarded, false))
   const [demoCleared, setDemoCleared] = useState<boolean>(() => getItem<boolean>(KEYS.demoCleared, false))
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(() => getItem<TimeEntry[]>(KEYS.timeEntries, []))
+  const [timeGoals, setTimeGoals] = useState<TimeGoal[]>(() => getItem<TimeGoal[]>(KEYS.timeGoals, []))
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     const tick = () => setNow(Date.now())
@@ -70,6 +82,22 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setItem(KEYS.dayOverrides, dayOverrides)
   }, [dayOverrides])
+
+  useEffect(() => {
+    setItem(KEYS.timeEntries, timeEntries)
+  }, [timeEntries])
+
+  useEffect(() => {
+    setItem(KEYS.timeGoals, timeGoals)
+  }, [timeGoals])
+
+  const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const addTimeEntry = (e: Omit<TimeEntry, 'id'>) => setTimeEntries((prev) => [...prev, { ...e, id: newId() }])
+  const deleteTimeEntry = (id: string) => setTimeEntries((prev) => prev.filter((e) => e.id !== id))
+  const addTimeGoal = (g: Omit<TimeGoal, 'id'>) => setTimeGoals((prev) => [...prev, { ...g, id: newId() }])
+  const updateTimeGoal = (id: string, patch: Partial<TimeGoal>) =>
+    setTimeGoals((prev) => prev.map((g) => (g.id === id ? { ...g, ...patch } : g)))
+  const deleteTimeGoal = (id: string) => setTimeGoals((prev) => prev.filter((g) => g.id !== id))
 
   function setDayStatus(dayKey: string, status: DayStatus | null) {
     setDayOverrides((prev) => {
@@ -114,6 +142,8 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
         else if (e.key === KEYS.wageSettings) setWageSettingsState(v)
         else if (e.key === KEYS.customExpenseCategories) setCustomExpenseCategories(v)
         else if (e.key === KEYS.dayOverrides) setDayOverrides(v)
+        else if (e.key === KEYS.timeEntries) setTimeEntries(v)
+        else if (e.key === KEYS.timeGoals) setTimeGoals(v)
         else if (e.key === KEYS.demoCleared) setDemoCleared(v)
         else if (e.key === KEYS.onboarded) setOnboarded(v)
       } catch {
@@ -195,6 +225,13 @@ export function LedgerProvider({ children }: { children: ReactNode }) {
     demoCleared,
     clearDemoData,
     resetToDemoData,
+    timeEntries,
+    addTimeEntry,
+    deleteTimeEntry,
+    timeGoals,
+    addTimeGoal,
+    updateTimeGoal,
+    deleteTimeGoal,
     now,
     dayOverrides,
     setDayStatus,

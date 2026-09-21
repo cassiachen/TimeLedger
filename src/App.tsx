@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AddTransactionModal } from './components/AddTransactionModal'
+import { ArrangeTimeSheet } from './components/ArrangeTimeSheet'
 import { BottomNav } from './components/BottomNav'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { OnboardingModal } from './components/OnboardingModal'
@@ -9,6 +10,7 @@ import { Bills } from './pages/Bills'
 import { Home } from './pages/Home'
 import { Settings } from './pages/Settings'
 import { Stats } from './pages/Stats'
+import { TimeLedger } from './pages/TimeLedger'
 import { LedgerProvider } from './store/LedgerContext'
 import { UIProvider } from './store/UIContext'
 
@@ -17,6 +19,7 @@ const SUBTITLES: Record<string, string> = {
   '/bills': '账单',
   '/stats': '统计',
   '/settings': '设置',
+  '/time': '时间账本',
 }
 
 function Shell() {
@@ -32,11 +35,13 @@ function Shell() {
           <Route path="/bills" element={<Bills />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/time" element={<TimeLedger />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <BottomNav />
       <AddTransactionModal />
+      <ArrangeTimeSheet />
       <OnboardingModal />
       <Toast />
       <ConfirmDialog />

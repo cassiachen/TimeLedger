@@ -87,3 +87,9 @@ export function fromDatetimeLocalValue(value: string): number {
   const t = new Date(value).getTime()
   return isNaN(t) ? Date.now() : t
 }
+
+/** 某个月的每一天的日期 key，month0 从 0 开始 */
+export function makeMonthDays(year: number, month0: number): string[] {
+  const count = new Date(year, month0 + 1, 0).getDate()
+  return Array.from({ length: count }, (_, i) => `${year}-${String(month0 + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`)
+}
